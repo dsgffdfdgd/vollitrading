@@ -28,31 +28,29 @@ export async function GET(req: Request) {
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
             include: {
-                wallet: true,
-                transactions: {
-                    take: 5,
-                    orderBy: { createdAt: 'desc' },
-                    where: {
-                        createdAt: {
-                            // Simple "Recent" filter if needed, or just take last 5
+                wallet: {
+                    include: {
+                        transactions: {
+                            take: 5,
+                            orderBy: { createdAt: 'desc' },
                         }
                     }
                 }
             }
         });
 
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        if (!user || !user.wallet) {
+            return NextResponse.json({ error: "User or Wallet not found" }, { status: 404 });
         }
 
         // Format for dashboard
         const dashboardData = {
-            walletId: user.wallet?.id,
-            equity: user.wallet?.mainBalance || 0,
+            walletId: user.wallet.id,
+            equity: user.wallet.mainBalance || 0,
             activeTrading: 0, // Logic for this would go here if we had trades
-            profit: user.wallet?.profitBalance || 0,
-            mainBalance: user.wallet?.mainBalance || 0,
-            recentActivity: user.transactions.map((t: any) => ({
+            profit: user.wallet.profitBalance || 0,
+            mainBalance: user.wallet.mainBalance || 0,
+            recentActivity: user.wallet.transactions.map((t: any) => ({
                 id: t.id,
                 name: t.type === 'DEPOSIT' ? `Deposit (${t.status})` : t.type,
                 amount: `$${t.amount.toFixed(2)}`,
