@@ -1,4 +1,11 @@
-DATABASE_URL="postgresql://username:password@hostname:port/database_name"
+# PRODUCTION (VERCEL) - Use this one for your Website Deployment
+# It handles high traffic "Transaction Pooler"
+DATABASE_URL="postgresql://postgres.bkqrnmrqnhwixkoeczna:AuH4yVGRendOUmc3@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# LOCAL DEVELOPMENT - Use this one for your Computer (Migrations/Push)
+# It allows schema changes "Direct Connection"
+# DATABASE_URL="postgresql://postgres.bkqrnmrqnhwixkoeczna:AuH4yVGRendOUmc3@aws-1-eu-west-1.pooler.supabase.com:5432/postgres"
+
 JWT_SECRET="pL9#vD8x!q2Rz6mB7uK1sG4wF0yH4nJ5"
 PESAPAL_CONSUMER_KEY="vLWPDMX8o/0BtGsGdDrKuaC8RbmKIBUl"
 PESAPAL_CONSUMER_SECRET="sIuyZY/sSQ0p13FpP92Fj3NmepM="
