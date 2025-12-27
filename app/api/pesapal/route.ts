@@ -7,6 +7,13 @@ const PESAPAL_CONSUMER_KEY = "vLWPDMX8o/0BtGsGdDrKuaC8RbmKIBUl";
 const PESAPAL_CONSUMER_SECRET = "sIuyZY/sSQ0p13FpP92Fj3NmepM=";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-this";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET() {
+    return NextResponse.json({ status: "PesaPal Service Ready" });
+}
+
 const PROD_URL = "https://pay.pesapal.com/v3";
 const SANDBOX_URL = "https://cybqa.pesapal.com/pesapalv3";
 
