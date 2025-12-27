@@ -73,10 +73,10 @@ export default function DashboardPage() {
                         <DollarSign className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${dashboardData.equity.toFixed(2)}</div>
+                        <div className="text-2xl font-bold">****</div>
                         <p className="text-xs text-muted-foreground flex items-center mt-1">
                             <ArrowUpRight className="h-3 w-3 mr-1" />
-                            0.0% from last month
+                            Hidden for privacy
                         </p>
                     </CardContent>
                 </Card>
