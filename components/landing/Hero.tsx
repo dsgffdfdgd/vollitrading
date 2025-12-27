@@ -4,6 +4,18 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { ArrowRight, BarChart2, ShieldCheck, TrendingUp } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+
+const chartData = [
+    { time: '09:00', value: 1240 },
+    { time: '10:00', value: 1255 },
+    { time: '11:00', value: 1245 },
+    { time: '12:00', value: 1275 },
+    { time: '13:00', value: 1300 },
+    { time: '14:00', value: 1285 },
+    { time: '15:00', value: 1340 },
+    { time: '16:00', value: 1360 },
+]
 
 export function Hero() {
     return (
@@ -98,8 +110,33 @@ export function Hero() {
                                     <div className="h-2 w-20 rounded-full bg-muted"></div>
                                 </div>
                                 {/* Mock Chart Area */}
-                                <div className="h-40 w-full rounded-lg bg-muted/20 border border-border mb-4 relative overflow-hidden flex items-center justify-center text-muted-foreground text-sm">
-                                    [Interactive Chart Visualization]
+                                {/* Real Chart Area */}
+                                <div className="h-64 w-full rounded-lg bg-black/40 border border-white/5 mb-4 relative overflow-hidden">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                                            <XAxis dataKey="time" hide />
+                                            <YAxis hide domain={['dataMin - 50', 'dataMax + 50']} />
+                                            <Tooltip
+                                                contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
+                                                itemStyle={{ color: '#10b981' }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="value"
+                                                stroke="#10b981"
+                                                strokeWidth={2}
+                                                fillOpacity={1}
+                                                fill="url(#colorValue)"
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
                                 </div>
                                 {/* Mock Stats */}
                                 <div className="grid grid-cols-3 gap-4">
