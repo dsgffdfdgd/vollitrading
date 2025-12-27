@@ -30,8 +30,8 @@ export async function POST(req: Request) {
         }
 
         let totalDistributed = 0;
-        const transactionOps = [];
-        const walletOps = [];
+        const transactionOps: any[] = [];
+        const walletOps: any[] = [];
 
         // 2. Prepare bulk updates
         // Note: Prisma doesn't support bulk update with different values easily in one query without raw SQL or loop.
