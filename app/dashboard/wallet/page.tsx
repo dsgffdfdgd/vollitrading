@@ -11,9 +11,17 @@ import { toast } from "sonner"
 
 import { useSearchParams } from "next/navigation"
 
-export default function WalletPage() {
+import { Suspense } from "react"
+
+function WalletContent() {
     const searchParams = useSearchParams()
     const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "deposit")
+
+    // ... rest of the component implementation ...
+    // Note: I will need to copy the entire logic of `WalletPage` into `WalletContent`
+    // and then export `WalletPage` as a wrapper with Suspense.
+    // However, the tool is strictly replacement. I will implement the wrapper pattern in-place.
+
     const [mainBalance, setMainBalance] = useState(0)
     const [profitBalance, setProfitBalance] = useState(0.00)
     const [depositAmount, setDepositAmount] = useState("")
@@ -94,14 +102,6 @@ export default function WalletPage() {
                 setIsLoading(false)
             }
             return
-        }
-
-        if (selectedPaymentMethod === 'card') {
-            // ... existing PesaPal logic ...
-            setIsLoading(true)
-            // ...
-            // We won't change this part yet, as it redirects to external.
-            // But for coherence we should probably log a PENDING transaction here too.
         }
 
         // Default or Crypto Deposit (Simulation of "I have sent funds")
@@ -537,5 +537,13 @@ export default function WalletPage() {
                 </Card>
             </div >
         </div >
+    )
+}
+
+export default function WalletPage() {
+    return (
+        <Suspense fallback={<div className="text-center p-8">Loading wallet...</div>}>
+            <WalletContent />
+        </Suspense>
     )
 }
