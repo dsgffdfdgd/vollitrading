@@ -41,7 +41,7 @@ export function Hero() {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="mt-10 max-w-lg text-4xl font-bold tracking-tight text-foreground sm:text-6xl"
                     >
-                        Master the Markets with <span className="text-primary">VOLLIFX</span>
+                        Turn Trades into Cash with <span className="text-primary">VOLLIFX</span>
                     </motion.h1>
 
                     <motion.p
