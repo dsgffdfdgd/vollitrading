@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // POST: Distribute Profit/Loss to all users
+export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
     try {
         const { percentage } = await req.json();
