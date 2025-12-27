@@ -3,6 +3,12 @@ import { prisma } from "@/lib/prisma";
 
 // POST: Distribute Profit/Loss to all users
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET() {
+    return NextResponse.json({ status: "OK" });
+}
+
 export async function POST(req: Request) {
     try {
         const { percentage } = await req.json();
