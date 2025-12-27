@@ -1,0 +1,5 @@
+DATABASE_URL="postgresql://username:password@hostname:port/database_name"
+JWT_SECRET="complex_secret_key_here"
+PESAPAL_CONSUMER_KEY="vLWPDMX8o/0BtGsGdDrKuaC8RbmKIBUl"
+PESAPAL_CONSUMER_SECRET="sIuyZY/sSQ0p13FpP92Fj3NmepM="
+NEXT_PUBLIC_APP_URL="https://vollitrading.com"
