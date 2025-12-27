@@ -29,6 +29,7 @@ model Wallet {
   userId       String        @unique
   user         User          @relation(fields: [userId], references: [id])
   mainBalance  Float         @default(0.0)
+  tradingBalance Float       @default(0.0)
   profitBalance Float        @default(0.0)
   transactions Transaction[]
 }

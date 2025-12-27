@@ -24,6 +24,7 @@ function WalletContent() {
 
     const [mainBalance, setMainBalance] = useState(0)
     const [profitBalance, setProfitBalance] = useState(0.00)
+    const [tradingBalance, setTradingBalance] = useState(0.00) // New State
     const [depositAmount, setDepositAmount] = useState("")
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("crypto")
     const [isLoading, setIsLoading] = useState(false)
@@ -40,6 +41,26 @@ function WalletContent() {
         phone: "",
         telegram: ""
     })
+
+    // FETCH WALLET DATA ON MOUNT
+    useEffect(() => {
+        const fetchWalletData = async () => {
+            try {
+                const res = await fetch('/api/user/dashboard');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.wallet) {
+                        setMainBalance(data.wallet.mainBalance || 0);
+                        setProfitBalance(data.wallet.profitBalance || 0);
+                        setTradingBalance(data.wallet.tradingBalance || 0);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch wallet data", error);
+            }
+        };
+        fetchWalletData();
+    }, []);
 
     const formatCardNumber = (val: string) => {
         return val.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim().slice(0, 19)
@@ -132,31 +153,88 @@ function WalletContent() {
         }
     }
 
-    const handleTransferToTrading = () => {
+    const handleTransferToTrading = async () => {
         if (mainBalance <= 0) {
             toast.error("Insufficient funds in Main Wallet. Please deposit first.")
             return;
         }
-        toast.success(`Transferred $${mainBalance.toFixed(2)} to Trading Wallet`)
-        setMainBalance(0)
+
+        try {
+            const res = await fetch('/api/wallet/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: mainBalance }) // Transfer ALL for now, or add input later
+            });
+
+            if (res.ok) {
+                toast.success(`Successfully transferred $${mainBalance.toFixed(2)} to Trading Pool`);
+                // Optimistic Update
+                setTradingBalance(prev => prev + mainBalance);
+                setMainBalance(0);
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Transfer failed");
+            }
+        } catch (e) {
+            toast.error("Network error");
+        }
     }
 
-    const handleWithdrawProfit = () => {
+    const handleWithdrawProfit = async () => {
         if (profitBalance <= 0) {
             toast.error("No profits available to withdraw")
             return
         }
-        toast.success("Withdrawal request submitted for approval.")
-        setProfitBalance(0)
+
+        // Simplified inputs for now - assuming user wants to withdraw ALL profits
+        // In a real app, you'd want inputs for amount/address in the dialog state
+        try {
+            const res = await fetch('/api/wallet/withdraw', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: profitBalance,
+                    method: "USDT", // Default for now
+                    address: "Requested via Dialog"
+                })
+            });
+
+            if (res.ok) {
+                toast.success("Withdrawal request submitted for approval.");
+                setProfitBalance(0);
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Withdrawal failed");
+            }
+        } catch (e) {
+            toast.error("Network error");
+        }
     }
 
-    const handleCompound = () => {
+    const handleCompound = async () => {
         if (profitBalance <= 0) {
             toast.error("No profits to compound")
             return;
         }
-        toast.success(`Compounded $${profitBalance.toFixed(2)} into Trading Pool`)
-        setProfitBalance(0)
+
+        try {
+            const res = await fetch('/api/wallet/compound', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: profitBalance })
+            });
+
+            if (res.ok) {
+                toast.success(`Compounded $${profitBalance.toFixed(2)} into Trading Pool`)
+                setTradingBalance(prev => prev + profitBalance);
+                setProfitBalance(0);
+            } else {
+                const data = await res.json();
+                toast.error(data.error || "Compound failed");
+            }
+        } catch (e) {
+            toast.error("Network error");
+        }
     }
 
     return (

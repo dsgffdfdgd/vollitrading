@@ -46,10 +46,16 @@ export async function GET(req: Request) {
         // Format for dashboard
         const dashboardData = {
             walletId: user.wallet.id,
-            equity: user.wallet.mainBalance || 0,
-            activeTrading: 0, // Logic for this would go here if we had trades
+            equity: (user.wallet.mainBalance + user.wallet.tradingBalance + user.wallet.profitBalance) || 0,
+            activeTrading: user.wallet.tradingBalance || 0,
             profit: user.wallet.profitBalance || 0,
             mainBalance: user.wallet.mainBalance || 0,
+            wallet: { // Nested object for WalletPage compatibility
+                id: user.wallet.id,
+                mainBalance: user.wallet.mainBalance || 0,
+                tradingBalance: user.wallet.tradingBalance || 0,
+                profitBalance: user.wallet.profitBalance || 0,
+            },
             recentActivity: user.wallet.transactions.map((t: any) => ({
                 id: t.id,
                 name: t.type === 'DEPOSIT' ? `Deposit (${t.status})` : t.type,
