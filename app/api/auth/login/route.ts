@@ -5,6 +5,13 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-this";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function GET() {
+    return NextResponse.json({ status: "Auth Service Ready" });
+}
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
