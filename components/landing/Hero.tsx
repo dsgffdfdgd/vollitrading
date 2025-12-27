@@ -7,14 +7,15 @@ import { ArrowRight, BarChart2, ShieldCheck, TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 const chartData = [
-    { time: '09:00', value: 1240 },
-    { time: '10:00', value: 1255 },
-    { time: '11:00', value: 1245 },
-    { time: '12:00', value: 1275 },
-    { time: '13:00', value: 1300 },
-    { time: '14:00', value: 1285 },
-    { time: '15:00', value: 1340 },
-    { time: '16:00', value: 1360 },
+    { time: '10:00', xau: 2024.50 },
+    { time: '10:15', xau: 2028.10 },
+    { time: '10:30', xau: 2026.40 },
+    { time: '10:45', xau: 2031.20 },
+    { time: '11:00', xau: 2029.80 },
+    { time: '11:15', xau: 2035.50 },
+    { time: '11:30', xau: 2033.20 },
+    { time: '11:45', xau: 2038.90 },
+    { time: '12:00', xau: 2036.50 },
 ]
 
 export function Hero() {
@@ -100,37 +101,46 @@ export function Hero() {
                         {/* Visual Representation of Platform - Simplified */}
                         <div className="rounded-xl bg-card border border-border resize-none shadow-sm p-2">
                             <div className="rounded-lg bg-background p-4 border border-border">
-                                {/* Mock UI Header */}
-                                <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
-                                    <div className="flex gap-2">
-                                        <div className="h-3 w-3 rounded-full bg-red-500/20"></div>
-                                        <div className="h-3 w-3 rounded-full bg-yellow-500/20"></div>
-                                        <div className="h-3 w-3 rounded-full bg-green-500/20"></div>
+                                {/* Mock UI Header - Market Ticker */}
+                                <div className="flex items-center justify-between mb-6 border-b border-border pb-4 overflow-x-auto">
+                                    <div className="flex gap-6 text-xs font-mono">
+                                        <div className="flex flex-col">
+                                            <span className="text-muted-foreground font-bold">XAUUSD</span>
+                                            <span className="text-emerald-500 font-semibold">2,036.50 <span className="text-[10px] ml-1">▲ 0.45%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-muted-foreground font-bold">USOIL</span>
+                                            <span className="text-red-500 font-semibold">74.20 <span className="text-[10px] ml-1">▼ 1.20%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-muted-foreground font-bold">NAS100</span>
+                                            <span className="text-emerald-500 font-semibold">16,840.10 <span className="text-[10px] ml-1">▲ 1.10%</span></span>
+                                        </div>
                                     </div>
-                                    <div className="h-2 w-20 rounded-full bg-muted"></div>
+                                    <div className="hidden sm:block h-2 w-20 rounded-full bg-muted/20"></div>
                                 </div>
-                                {/* Mock Chart Area */}
                                 {/* Real Chart Area */}
                                 <div className="h-64 w-full rounded-lg bg-black/40 border border-white/5 mb-4 relative overflow-hidden">
+                                    <div className="absolute top-2 left-3 z-10 text-[10px] font-mono text-white/40">GOLD vs US DOLLAR (15m)</div>
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={chartData}>
                                             <defs>
                                                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                                    <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#fbbf24" stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
                                             <XAxis dataKey="time" hide />
-                                            <YAxis hide domain={['dataMin - 50', 'dataMax + 50']} />
+                                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
                                             <Tooltip
                                                 contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
-                                                itemStyle={{ color: '#10b981' }}
+                                                itemStyle={{ color: '#fbbf24' }}
                                             />
                                             <Area
                                                 type="monotone"
-                                                dataKey="value"
-                                                stroke="#10b981"
+                                                dataKey="xau"
+                                                stroke="#fbbf24"
                                                 strokeWidth={2}
                                                 fillOpacity={1}
                                                 fill="url(#colorValue)"
