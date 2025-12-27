@@ -60,8 +60,8 @@ function WalletContent() {
     }
 
     const processDeposit = async () => {
-        if (!depositAmount || Number(depositAmount) < 1) {
-            toast.error("Minimum deposit amount is $1")
+        if (!depositAmount || Number(depositAmount) < 100) {
+            toast.error("Minimum deposit amount is $100")
             return
         }
 
@@ -504,7 +504,7 @@ function WalletContent() {
                                             <Input
                                                 type="number"
                                                 id="amount"
-                                                placeholder="Min $1"
+                                                placeholder="Min $100"
                                                 className="text-lg h-12"
                                                 value={depositAmount}
                                                 onChange={(e) => setDepositAmount(e.target.value)}
@@ -522,7 +522,7 @@ function WalletContent() {
                                         </Button>
                                     </div>
                                     <p className="text-xs text-muted-foreground mt-3">
-                                        * Deposits are processed securely. Minimum deposit is $1.
+                                        * Deposits are processed securely. Minimum deposit is $100.
                                     </p>
                                 </div>
                             </TabsContent>
