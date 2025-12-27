@@ -16,9 +16,21 @@ export default function AdminPage() {
     // Transaction Management State
     const [transactions, setTransactions] = useState<any[]>([])
 
+    useEffect(() => {
+        fetchDeposits()
+    }, [])
 
-
-
+    const fetchDeposits = async () => {
+        try {
+            const res = await fetch(`/api/admin/deposits?t=${Date.now()}`, { cache: 'no-store' })
+            if (res.ok) {
+                const data = await res.json()
+                setTransactions(data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const handleApplyProfit = async () => {
         if (!profitInput) return
@@ -74,7 +86,25 @@ export default function AdminPage() {
         }
     }
 
+    const handleApprove = async (id: string, amount: number) => {
+        const loadingToast = toast.loading("Approving deposit...")
+        try {
+            const res = await fetch('/api/admin/deposits', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId: id, action: 'APPROVE' })
+            })
 
+            if (res.ok) {
+                toast.success(`Deposit of $${amount} approved!`, { id: loadingToast })
+                fetchDeposits() // Refresh list
+            } else {
+                toast.error("Failed to approve", { id: loadingToast })
+            }
+        } catch (e) {
+            toast.error("Network error", { id: loadingToast })
+        }
+    }
 
     // ... existing handlers ...
 
@@ -114,13 +144,42 @@ export default function AdminPage() {
                     </Card>
 
                     {/* REAL Pending Deposits */}
-                    {/* Pending Deposits Removed */}
-                    <Card className="bg-gray-900 border-gray-800 col-span-1 border-l-4 border-l-gray-500 opacity-50">
+                    <Card className="bg-gray-900 border-gray-800 col-span-1 border-l-4 border-l-emerald-500">
                         <CardHeader>
-                            <CardTitle className="text-gray-400">Pending Deposits</CardTitle>
+                            <CardTitle className="flex justify-between items-center">
+                                <span>Pending Deposits</span>
+                                <span className="text-sm font-normal text-gray-400">{transactions.length} Request(s)</span>
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-center text-gray-500 py-8">Section Disabled</div>
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                {transactions.length === 0 ? (
+                                    <div className="text-center text-gray-500 py-8">No pending deposits</div>
+                                ) : (
+                                    transactions.map((tx) => (
+                                        <div key={tx.id} className="flex flex-col gap-2 p-3 bg-black/40 rounded-lg border border-white/5">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-semibold text-white">{tx.wallet?.user?.name || "Unknown User"}</div>
+                                                    <div className="text-xs text-gray-400">{tx.wallet?.user?.email}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-lg font-bold text-emerald-400">+${tx.amount.toLocaleString()}</div>
+                                                    <div className="text-[10px] text-gray-500">{new Date(tx.createdAt).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-2">
+                                                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => handleApprove(tx.id, tx.amount)}>
+                                                    Approve
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-950/30">
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

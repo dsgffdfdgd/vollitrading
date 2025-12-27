@@ -57,8 +57,44 @@ export default function WalletPage() {
             return
         }
 
-        // Card payment removed
+        if (selectedPaymentMethod === 'card') {
+            if (!userDetails.firstName || !userDetails.lastName || !userDetails.phone || !userDetails.telegram) {
+                toast.error("Please fill in all personal details for identification")
+                return
+            }
 
+            setIsLoading(true)
+            try {
+                const response = await fetch('/api/pesapal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: depositAmount,
+                        firstName: userDetails.firstName,
+                        lastName: userDetails.lastName,
+                        email: "user@example.com",
+                        phoneNumber: userDetails.phone,
+                    })
+                })
+
+                const data = await response.json()
+
+                if (data.redirect_url) {
+                    toast.success("Redirecting to PesaPal Payment Gateway...")
+                    window.location.href = data.redirect_url
+                } else {
+                    console.error("Payment Gateway Error:", data.error)
+                    // Display specific error from backend if available
+                    toast.error(data.error || "Online payment initialization failed.")
+                }
+            } catch (error) {
+                console.error("Payment Network Error:", error)
+                toast.error("Network error. Please try again.")
+            } finally {
+                setIsLoading(false)
+            }
+            return
+        }
 
         if (selectedPaymentMethod === 'card') {
             // ... existing PesaPal logic ...
@@ -254,7 +290,8 @@ export default function WalletPage() {
                             <TabsContent value="deposit" className="space-y-6">
                                 <div className="grid md:grid-cols-3 gap-4">
                                     {[
-                                        { id: 'crypto', label: 'Crypto (USDT/BTC)' }
+                                        { id: 'crypto', label: 'Crypto (USDT/BTC)' },
+                                        { id: 'card', label: 'Credit/Debit Card' }
                                     ].map((method) => (
                                         <div
                                             key={method.id}
@@ -299,7 +336,165 @@ export default function WalletPage() {
                                 )}
 
                                 {/* User Details Form for PesaPal/Legitimacy */}
+                                {selectedPaymentMethod === 'card' && (
+                                    <div className="p-6 border border-white/5 rounded-xl bg-secondary/10 space-y-4">
+                                        <div className="text-sm font-semibold flex items-center gap-2">
+                                            <Activity className="h-4 w-4 text-emerald-400" />
+                                            Identification Details
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Please provide your real name and phone number as they appear on your payment method.
+                                            Include your Telegram username for admin verification.
+                                        </p>
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs uppercase tracking-wider text-muted-foreground">First Name</label>
+                                                <Input
+                                                    placeholder="Real First Name"
+                                                    value={userDetails.firstName}
+                                                    onChange={(e) => setUserDetails({ ...userDetails, firstName: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs uppercase tracking-wider text-muted-foreground">Last Name</label>
+                                                <Input
+                                                    placeholder="Real Last Name"
+                                                    value={userDetails.lastName}
+                                                    onChange={(e) => setUserDetails({ ...userDetails, lastName: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs uppercase tracking-wider text-muted-foreground">Phone Number</label>
+                                                <Input
+                                                    placeholder="+254..."
+                                                    value={userDetails.phone}
+                                                    onChange={(e) => setUserDetails({ ...userDetails, phone: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs uppercase tracking-wider text-muted-foreground">Telegram Username</label>
+                                                <Input
+                                                    placeholder="@username"
+                                                    value={userDetails.telegram}
+                                                    onChange={(e) => setUserDetails({ ...userDetails, telegram: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
+                                {selectedPaymentMethod === 'card' && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 p-6 border border-white/10 rounded-xl bg-black/20">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="text-sm font-semibold">Payment Details</div>
+                                            <div className="flex items-center gap-1.5 text-xs text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                                                <Lock className="h-3 w-3" />
+                                                Secure 256-bit SSL Encryption
+                                            </div>
+                                        </div>
+
+                                        <div className="grid lg:grid-cols-2 gap-8 items-start">
+                                            {/* Visual Card */}
+                                            <div className="relative aspect-[1.586/1] rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] p-6 text-white shadow-2xl border border-white/10 overflow-hidden group">
+                                                {/* Card Background Effects */}
+                                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+                                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.3),rgba(255,255,255,0))]" />
+                                                <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+
+                                                <div className="relative h-full flex flex-col justify-between z-10">
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="w-12 h-8 rounded bg-yellow-400/20 border border-yellow-400/40 relative overflow-hidden backdrop-blur-sm">
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <div className="w-[120%] h-[1px] bg-yellow-400/30 rotate-45 transform" />
+                                                                <div className="w-[120%] h-[1px] bg-yellow-400/30 -rotate-45 transform" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-xl font-bold italic tracking-wider opacity-80">VISA</div>
+                                                    </div>
+
+                                                    <div className="space-y-6">
+                                                        <div className="font-mono text-2xl tracking-[0.15em] drop-shadow-md">
+                                                            {cardDetails.number || "0000 0000 0000 0000"}
+                                                        </div>
+
+                                                        <div className="flex justify-between items-end">
+                                                            <div className="space-y-1">
+                                                                <div className="text-[10px] uppercase tracking-wider text-gray-400">Card Holder</div>
+                                                                <div className="font-medium tracking-wide uppercase truncate max-w-[150px]">
+                                                                    {cardDetails.name || "YOUR NAME"}
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-1 text-right">
+                                                                <div className="text-[10px] uppercase tracking-wider text-gray-400">Expires</div>
+                                                                <div className="font-mono">{cardDetails.expiry || "MM/YY"}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Inputs */}
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-xs uppercase tracking-wider text-muted-foreground">Name on Card</label>
+                                                    <Input
+                                                        autoComplete="off"
+                                                        data-lpignore="true"
+                                                        placeholder="As written on card"
+                                                        className="bg-background/50 border-white/10 h-10"
+                                                        value={cardDetails.name}
+                                                        onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs uppercase tracking-wider text-muted-foreground">Card Number</label>
+                                                    <div className="relative">
+                                                        <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input
+                                                            autoComplete="off"
+                                                            data-lpignore="true"
+                                                            placeholder="0000 0000 0000 0000"
+                                                            className="pl-10 bg-background/50 border-white/10 h-10 font-mono"
+                                                            value={cardDetails.number}
+                                                            onChange={(e) => setCardDetails({ ...cardDetails, number: formatCardNumber(e.target.value) })}
+                                                            maxLength={19}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs uppercase tracking-wider text-muted-foreground">Expiry Date</label>
+                                                        <Input
+                                                            autoComplete="off"
+                                                            data-lpignore="true"
+                                                            placeholder="MM/YY"
+                                                            className="bg-background/50 border-white/10 h-10 text-center"
+                                                            value={cardDetails.expiry}
+                                                            onChange={(e) => setCardDetails({ ...cardDetails, expiry: formatExpiry(e.target.value) })}
+                                                            maxLength={5}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs uppercase tracking-wider text-muted-foreground">CVC / CWW</label>
+                                                        <div className="relative">
+                                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                                                            <Input
+                                                                autoComplete="off"
+                                                                data-lpignore="true"
+                                                                type="password"
+                                                                placeholder="•••"
+                                                                className="pl-9 bg-background/50 border-white/10 h-10 text-center tracking-widest"
+                                                                value={cardDetails.cvc}
+                                                                onChange={(e) => setCardDetails({ ...cardDetails, cvc: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                                                                maxLength={4}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
 
                                 <div className="p-6 border border-white/5 rounded-xl bg-secondary/10">
@@ -340,8 +535,7 @@ export default function WalletPage() {
                         </Tabs>
                     </CardContent>
                 </Card>
-            </div>
-            {/* ... */}
+            </div >
         </div >
     )
 }
