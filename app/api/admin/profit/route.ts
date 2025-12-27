@@ -62,7 +62,6 @@ export async function POST(req: Request) {
                 prisma.transaction.create({
                     data: {
                         walletId: wallet.id,
-                        type: "PROFIT", // Using PROFIT for both gain/loss or strictly PROFIT? 
                         // Schema says // PROFIT. Maybe add LOSS? Or just use PROFIT with negative?
                         // If I simply add to profitBalance, a negative profit is a loss.
                         // Let's stick to type "PROFIT" but checks context? 
