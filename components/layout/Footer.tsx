@@ -41,6 +41,31 @@ export function Footer() {
                                 </li>
                             </ul>
                         </div>
+                        <div>
+                            <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Connect</h2>
+                            <ul className="text-gray-500 dark:text-gray-400 font-medium">
+                                <li className="mb-4">
+                                    <a href="https://wa.me/254717420469" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-2">
+                                        WhatsApp
+                                    </a>
+                                </li>
+                                <li className="mb-4">
+                                    <a href="https://t.me/vollitrades" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-2">
+                                        Telegram
+                                    </a>
+                                </li>
+                                <li className="mb-4">
+                                    <a href="https://instagram.com/vollitrading" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-2">
+                                        Instagram
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://facebook.com/vollitrading" target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-2">
+                                        Facebook
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
