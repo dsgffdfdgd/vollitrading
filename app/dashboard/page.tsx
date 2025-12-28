@@ -20,20 +20,34 @@ export default function DashboardPage() {
     })
     const [isLoading, setIsLoading] = useState(true)
 
+    const [news, setNews] = useState<any[]>([])
+    const [isLoadingNews, setIsLoadingNews] = useState(true)
+
     const fetchData = async () => {
         setIsLoading(true)
         try {
+            // Fetch Dashboard Data
             const res = await fetch(`/api/user/dashboard?t=${Date.now()}`, { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
-                console.log("Dashboard Data Fetched:", data);
                 setDashboardData(data)
                 setLastUpdated(new Date())
+            }
+
+            // Fetch News Data
+            setIsLoadingNews(true)
+            const newsRes = await fetch('/api/news', { next: { revalidate: 300 } })
+            if (newsRes.ok) {
+                const newsData = await newsRes.json()
+                if (Array.isArray(newsData)) {
+                    setNews(newsData)
+                }
             }
         } catch (e) {
             toast.error("Failed to load dashboard data")
         } finally {
             setIsLoading(false)
+            setIsLoadingNews(false)
             setIsRefreshing(false)
         }
     }
@@ -165,23 +179,29 @@ export default function DashboardPage() {
                         <CardTitle className="text-sm font-medium">Economic Calendar</CardTitle>
                         <Calendar className="h-4 w-4 text-blue-500" />
                     </CardHeader>
-                    <CardContent className="h-[100px] overflow-hidden relative">
+                    <CardContent className="h-[150px] overflow-hidden relative">
+                        {/* Dynamic News List */}
                         <div className="space-y-3 mt-2">
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="font-mono text-muted-foreground">15:30</span>
-                                <span className="font-medium">USD CPI (MoM)</span>
-                                <span className="text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">High</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="font-mono text-muted-foreground">16:45</span>
-                                <span className="font-medium">EUR ECB Rate</span>
-                                <span className="text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">High</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs opacity-50">
-                                <span className="font-mono text-muted-foreground">19:00</span>
-                                <span className="font-medium">USD Fed Speak</span>
-                                <span className="text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded border border-yellow-500/20">Med</span>
-                            </div>
+                            {news.length > 0 ? (
+                                news.map((item: any, i) => (
+                                    <div key={i} className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-mono text-muted-foreground w-12">{item.time}</span>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium truncate max-w-[120px]">{item.title}</span>
+                                                <span className="text-[10px] text-muted-foreground">{item.country}</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 text-[10px] uppercase font-bold">
+                                            {item.impact}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs">
+                                    {isLoadingNews ? "Loading news..." : "No high impact news today"}
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
