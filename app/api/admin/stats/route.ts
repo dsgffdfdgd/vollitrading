@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import fs from "fs/promises";
-import path from "path";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-this";
 const ADMIN_EMAIL = "allankipkoech65@gmail.com";
-const STATS_FILE = path.join(process.cwd(), 'data', 'platform-stats.json');
 
+// Force dynamic to ensure we always fetch from DB
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -21,13 +20,28 @@ async function checkAdmin() {
     } catch { return false; }
 }
 
+// GET: Fetch platform stats
 export async function GET() {
     try {
-        const data = await fs.readFile(STATS_FILE, 'utf-8');
-        return NextResponse.json(JSON.parse(data));
+        // Find the first record, if not exists, return defaults
+        const stats = await prisma.platformStat.findFirst();
+
+        if (stats) {
+            return NextResponse.json({
+                activeTraders: stats.activeTraders,
+                pooledCapital: stats.pooledCapital
+            });
+        }
+
+        // Default values if DB is empty
+        return NextResponse.json({
+            activeTraders: 1240,
+            pooledCapital: 2400000
+        });
+
     } catch (error) {
-        // Fallback if file doesn't exist
-        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000, totalVolume: 54000000 });
+        console.error("Stats Fetch Error:", error);
+        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000 });
     }
 }
 
@@ -41,30 +55,34 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { activeTraders, pooledCapital } = body;
 
-        // Ensure "data" directory exists
-        const dir = path.dirname(STATS_FILE);
-        try {
-            await fs.access(dir);
-        } catch {
-            await fs.mkdir(dir, { recursive: true });
+        // Upsert: Create if no record exists, otherwise update the first one found.
+        // Since we don't have a known ID, we can do:
+        // 1. FindFirst
+        // 2. If exists -> update
+        // 3. If not -> create
+        // Or simpler: just ensure one record exists.
+
+        const existing = await prisma.platformStat.findFirst();
+
+        let result;
+        if (existing) {
+            result = await prisma.platformStat.update({
+                where: { id: existing.id },
+                data: {
+                    activeTraders: Number(activeTraders),
+                    pooledCapital: Number(pooledCapital)
+                }
+            });
+        } else {
+            result = await prisma.platformStat.create({
+                data: {
+                    activeTraders: Number(activeTraders),
+                    pooledCapital: Number(pooledCapital)
+                }
+            });
         }
 
-        // Read existing to preserve other fields if any
-        let existing = { activeTraders: 1240, pooledCapital: 2400000, totalVolume: 54000000 };
-        try {
-            const fileContent = await fs.readFile(STATS_FILE, 'utf-8');
-            existing = JSON.parse(fileContent);
-        } catch (e) { }
-
-        const newData = {
-            ...existing,
-            activeTraders: Number(activeTraders),
-            pooledCapital: Number(pooledCapital)
-        };
-
-        await fs.writeFile(STATS_FILE, JSON.stringify(newData, null, 4));
-
-        return NextResponse.json({ success: true, message: "Stats updated", data: newData });
+        return NextResponse.json({ success: true, message: "Stats updated", data: result });
 
     } catch (error: any) {
         console.error("Stats Update Error:", error);

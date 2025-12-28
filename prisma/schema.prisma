@@ -69,3 +69,10 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model PlatformStat {
+  id            String   @id @default(cuid())
+  activeTraders Int      @default(0)
+  pooledCapital Float    @default(0.0)
+  updatedAt     DateTime @updatedAt
+}
