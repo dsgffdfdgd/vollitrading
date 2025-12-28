@@ -4,16 +4,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Activity, ArrowUpRight, Clock, DollarSign } from "lucide-react"
+import { Activity, ArrowUpRight, Clock, DollarSign, Users } from "lucide-react"
 import React, { useState, useEffect } from "react"
+
 
 export default function LiveTradingPage() {
     const [pnl, setPnl] = useState(2.4)
+    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000 })
     const [trades, setTrades] = useState([
         { pair: "EUR/USD", type: "Long", entry: "1.0845", pnl: 0.45, current: 1.0890 },
         { pair: "GBP/JPY", type: "Short", entry: "182.30", pnl: 1.20, current: 180.12 },
         { pair: "XAU/USD", type: "Long", entry: "2045.50", pnl: -0.15, current: 2042.10 },
     ])
+
+    useEffect(() => {
+        // Fetch global stats
+        fetch('/api/admin/stats')
+            .then(res => res.json())
+            .then(data => {
+                if (data.activeTraders) {
+                    setStats({
+                        activeTraders: data.activeTraders,
+                        pooledCapital: data.pooledCapital
+                    })
+                }
+            })
+            .catch(err => console.error("Failed to fetch stats", err))
+    }, [])
 
     // Simulate live market data
     React.useEffect(() => {
@@ -38,12 +55,22 @@ export default function LiveTradingPage() {
                     <h2 className="text-3xl font-bold tracking-tight">Live Trading</h2>
                     <p className="text-muted-foreground">Monitor the active master pool performance in real-time.</p>
                 </div>
-                <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded-full border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                    <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                    </span>
-                    <span className="font-semibold text-sm">Market Active</span>
+                <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-full border border-white/5">
+                        <Users className="h-4 w-4 text-blue-400" />
+                        <span className="text-sm font-medium">{stats.activeTraders.toLocaleString()} <span className="text-muted-foreground">Active Traders</span></span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-full border border-white/5">
+                        <DollarSign className="h-4 w-4 text-emerald-400" />
+                        <span className="text-sm font-medium">${stats.pooledCapital.toLocaleString()} <span className="text-muted-foreground">Pooled Capital</span></span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded-full border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                        <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        </span>
+                        <span className="font-semibold text-sm">Market Active</span>
+                    </div>
                 </div>
             </div>
 

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import fs from "fs/promises";
+import path from "path";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-this";
 const ADMIN_EMAIL = "allankipkoech65@gmail.com";
+const STATS_FILE = path.join(process.cwd(), 'data', 'platform-stats.json');
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -20,30 +22,44 @@ async function checkAdmin() {
 }
 
 export async function GET() {
-    return NextResponse.json({ status: "OK" });
+    try {
+        const data = await fs.readFile(STATS_FILE, 'utf-8');
+        return NextResponse.json(JSON.parse(data));
+    } catch (error) {
+        // Fallback if file doesn't exist
+        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000, totalVolume: 54000000 });
+    }
 }
 
-// POST: Update platform active stats (Active Traders, Volume)
+// POST: Update platform active stats
 export async function POST(req: Request) {
     if (!(await checkAdmin())) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
-        const { activeTraders, volume } = await req.json();
+        const body = await req.json();
+        const { activeTraders, pooledCapital } = body;
 
-        // Since we don't have a 'SystemSettings' table, we will mock this persistence 
-        // by returning the values so the frontend can update its state.
-        // In a real app, you would save `activeTraders` and `volume` to a database table.
+        // Read existing to preserve other fields if any
+        let existing = { activeTraders: 1240, pooledCapital: 2400000, totalVolume: 54000000 };
+        try {
+            const fileContent = await fs.readFile(STATS_FILE, 'utf-8');
+            existing = JSON.parse(fileContent);
+        } catch (e) { }
 
-        // For now, we will just echo it back. The frontend will have to trust it was "saved"
-        // or we can implement a simple kv file store if persistence is truly needed without a new DB model.
+        const newData = {
+            ...existing,
+            activeTraders: Number(activeTraders),
+            pooledCapital: Number(pooledCapital)
+        };
 
-        // Let's assume we just want to Validate it works for now.
+        await fs.writeFile(STATS_FILE, JSON.stringify(newData, null, 4));
 
-        return NextResponse.json({ success: true, message: "Stats updated", data: { activeTraders, volume } });
+        return NextResponse.json({ success: true, message: "Stats updated", data: newData });
 
     } catch (error) {
+        console.error("Stats Update Error:", error);
         return NextResponse.json({ error: "Failed to update stats" }, { status: 500 });
     }
 }

@@ -11,7 +11,7 @@ import { useState, useEffect } from "react"
 
 export default function AdminPage() {
     // Profit Management State
-    const [pooledCapital, setPooledCapital] = useState(2400000)
+    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000 })
     const [profitInput, setProfitInput] = useState("")
 
     // Transaction Management State
@@ -19,7 +19,41 @@ export default function AdminPage() {
 
     useEffect(() => {
         fetchDeposits()
+        fetchStats()
     }, [])
+
+    const fetchStats = async () => {
+        try {
+            const res = await fetch(`/api/admin/stats?t=${Date.now()}`)
+            if (res.ok) {
+                const data = await res.json()
+                setStats({
+                    activeTraders: data.activeTraders || 1240,
+                    pooledCapital: data.pooledCapital || 2400000
+                })
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const handleUpdateStats = async () => {
+        try {
+            const res = await fetch('/api/admin/stats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(stats)
+            })
+
+            if (res.ok) {
+                toast.success("Platform stats updated globally!")
+            } else {
+                toast.error("Failed to update stats")
+            }
+        } catch (e) {
+            toast.error("Network error")
+        }
+    }
 
     const fetchDeposits = async () => {
         try {
@@ -109,19 +143,14 @@ export default function AdminPage() {
 
     return (
         <div className="flex h-screen bg-gray-950 text-white">
-            {/* Same Sidebar ... */}
             <div className="w-64 border-r border-gray-800 p-6 space-y-4">
                 <h1 className="text-xl font-bold mb-8">VOLLIFX ADMIN</h1>
                 <Link href="/dashboard">
                     <Button variant="ghost" className="w-full justify-start text-emerald-400 bg-emerald-400/10">Dashboard</Button>
                 </Link>
-                {/* ... */}
             </div>
 
             <div className="flex-1 p-8 overflow-y-auto">
-                {/* ... Cards ... */}
-
-
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* Platform Stats Management */}
                     <Card className="bg-gray-900 border-gray-800">
@@ -135,7 +164,8 @@ export default function AdminPage() {
                                     <label className="text-xs text-gray-400">Active Traders</label>
                                     <Input
                                         type="number"
-                                        defaultValue={1240}
+                                        value={stats.activeTraders}
+                                        onChange={(e) => setStats({ ...stats, activeTraders: Number(e.target.value) })}
                                         className="bg-black border-gray-700"
                                     />
                                 </div>
@@ -143,19 +173,19 @@ export default function AdminPage() {
                                     <label className="text-xs text-gray-400">Pooled Capital ($)</label>
                                     <Input
                                         type="number"
-                                        value={pooledCapital}
-                                        onChange={(e) => setPooledCapital(Number(e.target.value))}
+                                        value={stats.pooledCapital}
+                                        onChange={(e) => setStats({ ...stats, pooledCapital: Number(e.target.value) })}
                                         className="bg-black border-gray-700"
                                     />
                                 </div>
                             </div>
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => toast.success("Stats updated successfully!")}>
+                            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleUpdateStats}>
                                 Update Stats
                             </Button>
                         </CardContent>
                     </Card>
 
-                    {/* ... Profit Mgmt ... */}
+                    {/* Profit Mgmt */}
                     <Card className="bg-gray-900 border-gray-800">
                         <CardHeader>
                             <CardTitle>Trading Performance Management</CardTitle>
@@ -177,7 +207,7 @@ export default function AdminPage() {
                         </CardContent>
                     </Card>
 
-                    {/* REAL Pending Deposits */}
+                    {/* Pending Deposits */}
                     <Card className="bg-gray-900 border-gray-800 col-span-1 border-l-4 border-l-emerald-500">
                         <CardHeader>
                             <CardTitle className="flex justify-between items-center">
