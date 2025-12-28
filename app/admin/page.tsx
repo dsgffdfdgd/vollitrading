@@ -14,13 +14,27 @@ export default function AdminPage() {
     const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000 })
     const [profitInput, setProfitInput] = useState("")
 
-    // Transaction Management State
+    // Transaction & User Management State
     const [transactions, setTransactions] = useState<any[]>([])
+    const [users, setUsers] = useState<any[]>([])
 
     useEffect(() => {
         fetchDeposits()
         fetchStats()
+        fetchUsers()
     }, [])
+
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch(`/api/admin/users?t=${Date.now()}`)
+            if (res.ok) {
+                const data = await res.json()
+                setUsers(data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const fetchStats = async () => {
         try {
@@ -209,40 +223,63 @@ export default function AdminPage() {
 
                     {/* Pending Deposits */}
                     <Card className="bg-gray-900 border-gray-800 col-span-1 border-l-4 border-l-emerald-500">
+                        {/* ... existing content ... */}
+                    </Card>
+
+                    {/* User Wallets Oversight */}
+                    <Card className="bg-gray-900 border-gray-800 md:col-span-2">
                         <CardHeader>
-                            <CardTitle className="flex justify-between items-center">
-                                <span>Pending Deposits</span>
-                                <span className="text-sm font-normal text-gray-400">{transactions.length} Request(s)</span>
-                            </CardTitle>
+                            <CardTitle>User Wallets Oversight</CardTitle>
+                            <CardDescription>View all registered users and their current portfolio status.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                                {transactions.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-8">No pending deposits</div>
-                                ) : (
-                                    transactions.map((tx) => (
-                                        <div key={tx.id} className="flex flex-col gap-2 p-3 bg-black/40 rounded-lg border border-white/5">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="font-semibold text-white">{tx.wallet?.user?.name || "Unknown User"}</div>
-                                                    <div className="text-xs text-gray-400">{tx.wallet?.user?.email}</div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-lg font-bold text-emerald-400">+${tx.amount.toLocaleString()}</div>
-                                                    <div className="text-[10px] text-gray-500">{new Date(tx.createdAt).toLocaleString()}</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2 mt-2">
-                                                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => handleApprove(tx.id, tx.amount)}>
-                                                    Approve
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-950/30">
-                                                    Reject
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="text-xs text-gray-400 uppercase bg-black/40 border-b border-gray-800">
+                                        <tr>
+                                            <th className="px-4 py-3">User</th>
+                                            <th className="px-4 py-3">Joined</th>
+                                            <th className="px-4 py-3 text-right">Main Wallet</th>
+                                            <th className="px-4 py-3 text-right">Trading Pool</th>
+                                            <th className="px-4 py-3 text-right">Profit Balance</th>
+                                            <th className="px-4 py-3 text-right text-emerald-400">Total Equity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-800">
+                                        {users.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">No users found</td>
+                                            </tr>
+                                        ) : (
+                                            users.map((user: any) => {
+                                                const totalEquity = (user.wallet.mainBalance + user.wallet.tradingBalance + user.wallet.profitBalance);
+                                                return (
+                                                    <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                                                        <td className="px-4 py-3">
+                                                            <div className="font-medium text-white">{user.name}</div>
+                                                            <div className="text-xs text-gray-500">{user.email}</div>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-gray-400">
+                                                            {new Date(user.createdAt).toLocaleDateString()}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-mono">
+                                                            ${user.wallet.mainBalance.toFixed(2)}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-mono text-blue-400">
+                                                            ${user.wallet.tradingBalance.toFixed(2)}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-mono text-emerald-400">
+                                                            ${user.wallet.profitBalance.toFixed(2)}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-bold text-white">
+                                                            ${totalEquity.toFixed(2)}
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         </CardContent>
                     </Card>
