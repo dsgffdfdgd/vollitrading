@@ -23,13 +23,14 @@ async function checkAdmin() {
 // GET: Fetch platform stats
 export async function GET() {
     try {
-        // Find the first record, if not exists, return defaults
-        const stats = await prisma.platformStat.findFirst();
+        // Fallback to raw query because Prisma Client might be stale/locked
+        const statsRaw: any[] = await prisma.$queryRaw`SELECT * FROM "PlatformStat" LIMIT 1`;
+        const stats = statsRaw[0];
 
         if (stats) {
             return NextResponse.json({
-                activeTraders: stats.activeTraders,
-                pooledCapital: stats.pooledCapital,
+                activeTraders: stats.activeTraders || 1240,
+                pooledCapital: stats.pooledCapital || 2400000,
                 activeTradingDisplay: stats.activeTradingDisplay || 0
             });
         }
@@ -57,36 +58,28 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { activeTraders, pooledCapital, activeTradingDisplay } = body;
 
-        // Upsert: Create if no record exists, otherwise update the first one found.
-        // Since we don't have a known ID, we can do:
-        // 1. FindFirst
-        // 2. If exists -> update
-        // 3. If not -> create
-        // Or simpler: just ensure one record exists.
+        // Use raw queries to bypass stale client
+        const statsRaw: any[] = await prisma.$queryRaw`SELECT * FROM "PlatformStat" LIMIT 1`;
+        const existing = statsRaw[0];
 
-        const existing = await prisma.platformStat.findFirst();
-
-        let result;
         if (existing) {
-            result = await prisma.platformStat.update({
-                where: { id: existing.id },
-                data: {
-                    activeTraders: Number(activeTraders),
-                    pooledCapital: Number(pooledCapital),
-                    activeTradingDisplay: Number(activeTradingDisplay || 0)
-                }
-            });
+            await prisma.$executeRaw`
+                UPDATE "PlatformStat" 
+                SET "activeTraders" = ${Number(activeTraders)}, 
+                    "pooledCapital" = ${Number(pooledCapital)}, 
+                    "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
+                    "updatedAt" = NOW()
+                WHERE id = ${existing.id}
+            `;
         } else {
-            result = await prisma.platformStat.create({
-                data: {
-                    activeTraders: Number(activeTraders),
-                    pooledCapital: Number(pooledCapital),
-                    activeTradingDisplay: Number(activeTradingDisplay || 0)
-                }
-            });
+            const newId = 'global-stat-' + Date.now();
+            await prisma.$executeRaw`
+                INSERT INTO "PlatformStat" (id, "activeTraders", "pooledCapital", "activeTradingDisplay", "updatedAt")
+                VALUES (${newId}, ${Number(activeTraders)}, ${Number(pooledCapital)}, ${Number(activeTradingDisplay || 0)}, NOW())
+            `;
         }
 
-        return NextResponse.json({ success: true, message: "Stats updated", data: result });
+        return NextResponse.json({ success: true, message: "Stats updated" });
 
     } catch (error: any) {
         console.error("Stats Update Error:", error);

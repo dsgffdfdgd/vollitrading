@@ -39,7 +39,9 @@ export async function GET(req: Request) {
             }
         });
 
-        const stats = await prisma.platformStat.findFirst();
+        // Fetch platform stats via raw query to avoid stale client issues
+        const statsRaw: any[] = await prisma.$queryRaw`SELECT * FROM "PlatformStat" LIMIT 1`;
+        const stats = statsRaw[0];
 
         if (!user || !user.wallet) {
             return NextResponse.json({ error: "User or Wallet not found" }, { status: 404 });
@@ -51,7 +53,6 @@ export async function GET(req: Request) {
             equity: (user.wallet.mainBalance + user.wallet.tradingBalance + user.wallet.profitBalance) || 0,
 
             // Use Global Active Trading Config if available, else fallback to user's allocated
-            // If activeTradingDisplay is set > 0, override user's view.
             activeTrading: (stats?.activeTradingDisplay && stats.activeTradingDisplay > 0)
                 ? stats.activeTradingDisplay
                 : (user.wallet.tradingBalance || 0),
