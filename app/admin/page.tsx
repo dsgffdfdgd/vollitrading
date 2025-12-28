@@ -121,7 +121,40 @@ export default function AdminPage() {
             <div className="flex-1 p-8 overflow-y-auto">
                 {/* ... Cards ... */}
 
+
                 <div className="grid gap-6 md:grid-cols-2">
+                    {/* Platform Stats Management */}
+                    <Card className="bg-gray-900 border-gray-800">
+                        <CardHeader>
+                            <CardTitle>Platform Stats</CardTitle>
+                            <CardDescription>Update global counters shown on landing page.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs text-gray-400">Active Traders</label>
+                                    <Input
+                                        type="number"
+                                        defaultValue={1240}
+                                        className="bg-black border-gray-700"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs text-gray-400">Pooled Capital ($)</label>
+                                    <Input
+                                        type="number"
+                                        value={pooledCapital}
+                                        onChange={(e) => setPooledCapital(Number(e.target.value))}
+                                        className="bg-black border-gray-700"
+                                    />
+                                </div>
+                            </div>
+                            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => toast.success("Stats updated successfully!")}>
+                                Update Stats
+                            </Button>
+                        </CardContent>
+                    </Card>
+
                     {/* ... Profit Mgmt ... */}
                     <Card className="bg-gray-900 border-gray-800">
                         <CardHeader>
