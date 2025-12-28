@@ -57,6 +57,11 @@ export async function POST(req: Request) {
                 subject: "Reset Your Password",
                 html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`
             });
+
+            return NextResponse.json({ success: true });
+        } else {
+            // DEMO MODE: Return link to frontend so user can proceed without email
+            return NextResponse.json({ success: true, demoLink: resetLink });
         }
 
         return NextResponse.json({ success: true });

@@ -26,8 +26,21 @@ export default function ForgotPasswordPage() {
             })
 
             if (res.ok) {
+                const data = await res.json()
                 setIsSubmitted(true)
-                toast.success("Reset link sent to your email")
+
+                if (data.demoLink) {
+                    toast.message("DEMO MODE: Click to Reset", {
+                        description: "Since SMTP is not set, here is your link.",
+                        action: {
+                            label: "Reset Now",
+                            onClick: () => window.location.href = data.demoLink
+                        },
+                        duration: 10000,
+                    })
+                } else {
+                    toast.success("Reset link sent to your email")
+                }
             } else {
                 const data = await res.json()
                 toast.error(data.error || "Failed to send reset link")
