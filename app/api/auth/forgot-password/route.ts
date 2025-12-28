@@ -6,13 +6,20 @@ import nodemailer from "nodemailer";
 export async function POST(req: Request) {
     try {
         const { email } = await req.json();
+        console.log(`[DEBUG] Forgot Password attempt for: ${email}`);
 
         // 1. Verify User Exists
-        const user = await prisma.user.findUnique({
-            where: { email }
+        const user = await prisma.user.findFirst({
+            where: {
+                email: {
+                    equals: email,
+                    mode: 'insensitive' // Ensure case-insensitive match
+                }
+            }
         });
 
         if (!user) {
+            console.log(`[DEBUG] User not found for email: ${email}`);
             // Return success to prevent email enumeration
             return NextResponse.json({ success: true });
         }
