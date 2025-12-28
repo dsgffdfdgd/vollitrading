@@ -1,14 +1,19 @@
+"use client"
+
 import { Sidebar } from "@/components/dashboard/Sidebar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
+import { useState } from "react"
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const [sheetOpen, setSheetOpen] = useState(false)
+
     return (
         <div className="flex h-screen overflow-hidden bg-background text-foreground">
             {/* Desktop Sidebar */}
@@ -26,14 +31,14 @@ export default function DashboardLayout({
                     <div className="font-bold text-xl">VOLLIFX</div>
                     <div className="flex items-center gap-2">
                         <ModeToggle />
-                        <Sheet>
+                        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                             <SheetTrigger asChild>
                                 <Button variant="ghost" size="icon">
                                     <Menu className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
                             <SheetContent side="left" className="p-0 border-r-border w-64 bg-card text-foreground">
-                                <Sidebar className="w-full border-none" />
+                                <Sidebar className="w-full border-none" onClose={() => setSheetOpen(false)} />
                             </SheetContent>
                         </Sheet>
                     </div>

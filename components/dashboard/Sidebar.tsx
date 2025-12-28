@@ -15,7 +15,7 @@ const navigation = [
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
-export function Sidebar({ className }: { className?: string }) {
+export function Sidebar({ className, onClose }: { className?: string, onClose?: () => void }) {
     const pathname = usePathname()
 
     return (
@@ -34,6 +34,7 @@ export function Sidebar({ className }: { className?: string }) {
                         <Link
                             key={item.name}
                             href={item.href}
+                            onClick={onClose}
                             className={cn(
                                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                                 isActive
