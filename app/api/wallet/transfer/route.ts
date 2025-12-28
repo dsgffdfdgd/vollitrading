@@ -45,7 +45,7 @@ export async function POST(req: Request) {
                 where: { id: user.wallet.id },
                 data: {
                     mainBalance: { decrement: transferAmount },
-                    tradingBalance: { increment: transferAmount }
+                    profitBalance: { increment: transferAmount }
                 }
             }),
             prisma.transaction.create({
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                     type: "TRANSFER",
                     amount: transferAmount,
                     status: "COMPLETED",
-                    reference: "Main to Trading Pool"
+                    reference: "Main to Profit Wallet"
                 }
             })
         ]);

@@ -45,7 +45,7 @@ export async function POST(req: Request) {
                 where: { id: user.wallet.id },
                 data: {
                     profitBalance: { decrement: compoundAmount },
-                    tradingBalance: { increment: compoundAmount }
+                    mainBalance: { increment: compoundAmount }
                 }
             }),
             prisma.transaction.create({
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                     type: "COMPOUND",
                     amount: compoundAmount,
                     status: "COMPLETED",
-                    reference: "Profit Reinvestment"
+                    reference: "Profit to Main Wallet"
                 }
             })
         ]);
