@@ -66,19 +66,16 @@ export async function POST(req: Request) {
         // 2. Determine types and create records
         if (deltaMain !== 0) {
             const type = deltaMain > 0 ? "DEPOSIT" : "WITHDRAWAL";
-            addTx(deltaMain, "ADJUSTMENT", `Admin Edit (Main): ${deltaMain > 0 ? '+' : ''}${deltaMain.toFixed(2)}`);
+            addTx(deltaMain, type, `Admin Edit (Main): ${deltaMain > 0 ? '+' : ''}${deltaMain.toFixed(2)}`);
         }
         if (deltaTrading !== 0) {
-            // Trading balance changes are usually transfers or allocations
-            addTx(deltaTrading, "ADJUSTMENT", `Admin Edit (Trading): ${deltaTrading > 0 ? '+' : ''}${deltaTrading.toFixed(2)}`);
+            // Trading changes treated as Deposit/Withdrawal to/from pool
+            const type = deltaTrading > 0 ? "DEPOSIT" : "WITHDRAWAL";
+            addTx(deltaTrading, type, `Admin Edit (Trading): ${deltaTrading > 0 ? '+' : ''}${deltaTrading.toFixed(2)}`);
         }
         if (deltaProfit !== 0) {
             const type = deltaProfit > 0 ? "PROFIT" : "LOSS";
-            // If admin manually edits profit, log it as PROFIT/LOSS or ADJUSTMENT? 
-            // User requested "prodits" (profits) to be recorded.
-            // If positive, call it PROFIT. If negative, maybe ADJUSTMENT or LOSS.
-            // Let's stick to ADJUSTMENT for manual edits to differentiate from automated daily profit.
-            addTx(deltaProfit, "ADJUSTMENT", `Admin Edit (Profit): ${deltaProfit > 0 ? '+' : ''}${deltaProfit.toFixed(2)}`);
+            addTx(deltaProfit, type, `Admin Edit (Profit): ${deltaProfit > 0 ? '+' : ''}${deltaProfit.toFixed(2)}`);
         }
 
         // 3. Execute Transaction

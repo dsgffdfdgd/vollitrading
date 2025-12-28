@@ -50,7 +50,7 @@ export default function TransactionsPage() {
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Transaction History</h2>
                 <div className="flex gap-2">
-                    {['All', 'Deposit', 'Withdrawal', 'Profit'].map(f => (
+                    {['All', 'Deposit', 'Withdrawal', 'Profit', 'Loss'].map(f => (
                         <Button
                             key={f}
                             variant={filter === f ? 'default' : 'outline'}
@@ -98,8 +98,8 @@ export default function TransactionsPage() {
                                     <TableCell>{txn.type}</TableCell>
                                     <TableCell className="text-muted-foreground">{txn.reference || "-"}</TableCell>
                                     <TableCell>{new Date(txn.createdAt).toLocaleDateString()}</TableCell>
-                                    <TableCell className={txn.type === 'DEPOSIT' || txn.type === 'PROFIT' ? 'text-emerald-400' : 'text-red-400'}>
-                                        {txn.type === 'WITHDRAWAL' ? '-' : '+'}${txn.amount.toFixed(2)}
+                                    <TableCell className={['DEPOSIT', 'PROFIT'].includes(txn.type) ? 'text-emerald-400' : 'text-red-400'}>
+                                        {['WITHDRAWAL', 'LOSS'].includes(txn.type) ? '-' : '+'}${txn.amount.toFixed(2)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Badge variant={txn.status === 'COMPLETED' ? 'secondary' : 'outline'} className={txn.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20' : ''}>
