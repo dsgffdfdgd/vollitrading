@@ -59,10 +59,12 @@ export default function AdminPage() {
                 body: JSON.stringify(stats)
             })
 
+            const data = await res.json()
+
             if (res.ok) {
                 toast.success("Platform stats updated globally!")
             } else {
-                toast.error("Failed to update stats")
+                toast.error(data.error || "Failed to update stats")
             }
         } catch (e) {
             toast.error("Network error")

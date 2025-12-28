@@ -34,12 +34,20 @@ export async function GET() {
 // POST: Update platform active stats
 export async function POST(req: Request) {
     if (!(await checkAdmin())) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     try {
         const body = await req.json();
         const { activeTraders, pooledCapital } = body;
+
+        // Ensure "data" directory exists
+        const dir = path.dirname(STATS_FILE);
+        try {
+            await fs.access(dir);
+        } catch {
+            await fs.mkdir(dir, { recursive: true });
+        }
 
         // Read existing to preserve other fields if any
         let existing = { activeTraders: 1240, pooledCapital: 2400000, totalVolume: 54000000 };
@@ -58,8 +66,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, message: "Stats updated", data: newData });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Stats Update Error:", error);
-        return NextResponse.json({ error: "Failed to update stats" }, { status: 500 });
+        return NextResponse.json({ error: error.message || "Failed to update stats" }, { status: 500 });
     }
 }
