@@ -60,8 +60,7 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ success: true });
         } else {
-            // DEMO MODE: Return link to frontend so user can proceed without email
-            return NextResponse.json({ success: true, demoLink: resetLink });
+            console.log("SMTP not configured. Link logged to console only.");
         }
 
         return NextResponse.json({ success: true });
