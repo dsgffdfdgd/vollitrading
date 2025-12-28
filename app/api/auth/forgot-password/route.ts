@@ -1,38 +1,61 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
-
-// This would typically involve sending an email via SendGrid, Resend, or AWS SES.
-// Since we don't have an email provider set up in this demo environment, 
-// we will simulate the "Sending" and logging the reset token for debugging/demo purposes.
+import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
     try {
         const { email } = await req.json();
 
+        // 1. Verify User Exists
         const user = await prisma.user.findUnique({
             where: { email }
         });
 
         if (!user) {
-            // For security, don't reveal if user exists. 
-            // Just pretend to send it.
+            // Return success to prevent email enumeration
             return NextResponse.json({ success: true });
         }
 
-        // Generate a reset token (in a real app, you'd save this to the DB with an expiry)
-        // For simplicity here, we'll just log it. A real implementation needs a 'ResetToken' model.
+        // 2. Generate Token
+        // In a real production app, store this in a 'PasswordResetToken' table with expiry.
+        // For this demo, we will just simulate the link creation.
         const resetToken = crypto.randomBytes(32).toString("hex");
+        const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
 
-        // TODO: Save token to database (users table or separate tokens table)
-        // await prisma.passwordResetToken.create({ ... })
+        // 3. Send Email (Simulation / Logic)
+        console.log("=========================================");
+        console.log(" PASSWORD RESET REQUEST ");
+        console.log("=========================================");
+        console.log(`Email: ${email}`);
+        console.log(`Reset Token: ${resetToken}`);
+        console.log(`Reset Link: ${resetLink}`);
+        console.log("=========================================");
 
-        console.log(`[DEMO] Password Reset Request for ${email}. Token: ${resetToken}`);
-        console.log(`[DEMO] Reset Link: ${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`);
+        // Note: To make this actually send emails, configure SMTP vars:
+        // SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
+        if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: Number(process.env.SMTP_PORT),
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS,
+                },
+            });
+
+            await transporter.sendMail({
+                from: '"VOLLIFX Security" <noreply@vollitrading.com>',
+                to: email,
+                subject: "Reset Your Password",
+                html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`
+            });
+        }
 
         return NextResponse.json({ success: true });
 
     } catch (error) {
+        console.error("Forgot Password Error:", error);
         return NextResponse.json({ error: "Internal Error" }, { status: 500 });
     }
 }
