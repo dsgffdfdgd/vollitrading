@@ -2,7 +2,7 @@
 
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowUpRight, DollarSign, Wallet, TrendingUp, Activity, RefreshCw } from "lucide-react"
+import { ArrowUpRight, DollarSign, Wallet, TrendingUp, Activity, RefreshCw, Globe, Calendar, BarChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
@@ -123,6 +123,96 @@ export default function DashboardPage() {
                             </Button>
                         </div>
                         <p className="text-[10px] text-muted-foreground/30 font-mono">ID: {dashboardData.walletId}</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Live Market Widgets */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {/* Session Status */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Forex Sessions</CardTitle>
+                        <Globe className="h-4 w-4 text-emerald-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between mt-4">
+                            <div className="flex flex-col items-center">
+                                <div className="text-xs text-muted-foreground mb-1">Sydney/Tokyo</div>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                                    Closed
+                                </span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <div className="text-xs text-muted-foreground mb-1">London</div>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 animate-pulse">
+                                    Open
+                                </span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <div className="text-xs text-muted-foreground mb-1">New York</div>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
+                                    Pre-market
+                                </span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Economic Calendar Highlights */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Economic Calendar</CardTitle>
+                        <Calendar className="h-4 w-4 text-blue-500" />
+                    </CardHeader>
+                    <CardContent className="h-[100px] overflow-hidden relative">
+                        <div className="space-y-3 mt-2">
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="font-mono text-muted-foreground">15:30</span>
+                                <span className="font-medium">USD CPI (MoM)</span>
+                                <span className="text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">High</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="font-mono text-muted-foreground">16:45</span>
+                                <span className="font-medium">EUR ECB Rate</span>
+                                <span className="text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">High</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs opacity-50">
+                                <span className="font-mono text-muted-foreground">19:00</span>
+                                <span className="font-medium">USD Fed Speak</span>
+                                <span className="text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded border border-yellow-500/20">Med</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Market Sentiment */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Market Sentiment</CardTitle>
+                        <BarChart className="h-4 w-4 text-purple-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4 mt-2">
+                            <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                    <span className="font-medium">XAUUSD (Gold)</span>
+                                    <span className="text-emerald-500">65% Bullish</span>
+                                </div>
+                                <div className="h-2 bg-secondary/50 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 w-[65%] rounded-full" />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
+                                    <span className="font-medium">EURUSD</span>
+                                    <span className="text-red-500">58% Bearish</span>
+                                </div>
+                                <div className="h-2 bg-secondary/50 rounded-full overflow-hidden">
+                                    <div className="h-full bg-red-500 w-[58%] rounded-full" />
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
