@@ -16,10 +16,17 @@ export default function AdminPage() {
 
     // Transaction & User Management State
     const [transactions, setTransactions] = useState<any[]>([])
+    const [withdrawals, setWithdrawals] = useState<any[]>([])
     const [users, setUsers] = useState<any[]>([])
+
+    // Edit User Wallet State
+    const [editingUser, setEditingUser] = useState<any>(null)
+    const [editForm, setEditForm] = useState({ mainBalance: 0, tradingBalance: 0, profitBalance: 0 })
+    const [isEditOpen, setIsEditOpen] = useState(false)
 
     useEffect(() => {
         fetchDeposits()
+        fetchWithdrawals()
         fetchStats()
         fetchUsers()
     }, [])
@@ -80,6 +87,76 @@ export default function AdminPage() {
             }
         } catch (error) {
             console.error(error)
+        }
+    }
+
+    const fetchWithdrawals = async () => {
+        try {
+            const res = await fetch(`/api/admin/withdrawals?t=${Date.now()}`, { cache: 'no-store' })
+            if (res.ok) {
+                const data = await res.json()
+                setWithdrawals(data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const handleProcessWithdrawal = async (id: string, action: 'APPROVE' | 'REJECT') => {
+        const loadingToast = toast.loading(`${action === 'APPROVE' ? 'Approving' : 'Rejecting'} withdrawal...`)
+        try {
+            const res = await fetch('/api/admin/withdrawals', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transactionId: id, action })
+            })
+
+            const data = await res.json()
+
+            if (res.ok) {
+                toast.success(data.message, { id: loadingToast })
+                fetchWithdrawals()
+            } else {
+                toast.error(data.error || "Process failed", { id: loadingToast })
+            }
+        } catch (e) {
+            toast.error("Network error", { id: loadingToast })
+        }
+    }
+
+    const startEditUser = (user: any) => {
+        setEditingUser(user)
+        setEditForm({
+            mainBalance: user.wallet.mainBalance,
+            tradingBalance: user.wallet.tradingBalance,
+            profitBalance: user.wallet.profitBalance
+        })
+        setIsEditOpen(true)
+    }
+
+    const handleUpdateWallet = async () => {
+        if (!editingUser) return
+
+        const loadingToast = toast.loading("Updating wallet...")
+        try {
+            const res = await fetch('/api/admin/users/update-wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: editingUser.id,
+                    ...editForm
+                })
+            })
+
+            if (res.ok) {
+                toast.success("Wallet updated successfully", { id: loadingToast })
+                setIsEditOpen(false)
+                fetchUsers() // Refresh list
+            } else {
+                toast.error("Failed to update wallet", { id: loadingToast })
+            }
+        } catch (e) {
+            toast.error("Network error", { id: loadingToast })
         }
     }
 
@@ -158,7 +235,7 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="flex h-screen bg-gray-950 text-white">
+        <div className="flex h-screen bg-gray-950 text-white relative">
             <div className="w-64 border-r border-gray-800 p-6 space-y-4">
                 <h1 className="text-xl font-bold mb-8">VOLLIFX ADMIN</h1>
                 <Link href="/dashboard">
@@ -225,7 +302,82 @@ export default function AdminPage() {
 
                     {/* Pending Deposits */}
                     <Card className="bg-gray-900 border-gray-800 col-span-1 border-l-4 border-l-emerald-500">
-                        {/* ... existing content ... */}
+                        <CardHeader>
+                            <CardTitle className="flex justify-between items-center">
+                                <span>Pending Deposits</span>
+                                <span className="text-sm font-normal text-gray-400">{transactions.length} Request(s)</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                {transactions.length === 0 ? (
+                                    <div className="text-center text-gray-500 py-8">No pending deposits</div>
+                                ) : (
+                                    transactions.map((tx) => (
+                                        <div key={tx.id} className="flex flex-col gap-2 p-3 bg-black/40 rounded-lg border border-white/5">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-semibold text-white">{tx.wallet?.user?.name || "Unknown User"}</div>
+                                                    <div className="text-xs text-gray-400">{tx.wallet?.user?.email}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-lg font-bold text-emerald-400">+${tx.amount.toLocaleString()}</div>
+                                                    <div className="text-[10px] text-gray-500">{new Date(tx.createdAt).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-2">
+                                                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => handleApprove(tx.id, tx.amount)}>
+                                                    Approve
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-950/30">
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Pending Withdrawals */}
+                    <Card className="bg-gray-900 border-gray-800 col-span-1 border-l-4 border-l-orange-500">
+                        <CardHeader>
+                            <CardTitle className="flex justify-between items-center">
+                                <span>Pending Withdrawals</span>
+                                <span className="text-sm font-normal text-gray-400">{withdrawals.length} Request(s)</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                {withdrawals.length === 0 ? (
+                                    <div className="text-center text-gray-500 py-8">No pending withdrawals</div>
+                                ) : (
+                                    withdrawals.map((tx) => (
+                                        <div key={tx.id} className="flex flex-col gap-2 p-3 bg-black/40 rounded-lg border border-white/5">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-semibold text-white">{tx.wallet?.user?.name || "Unknown User"}</div>
+                                                    <div className="text-xs text-gray-400">{tx.reference}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-lg font-bold text-orange-400">-${tx.amount.toLocaleString()}</div>
+                                                    <div className="text-[10px] text-gray-500">{new Date(tx.createdAt).toLocaleString()}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-2">
+                                                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => handleProcessWithdrawal(tx.id, 'APPROVE')}>
+                                                    Approve
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-950/30" onClick={() => handleProcessWithdrawal(tx.id, 'REJECT')}>
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </CardContent>
                     </Card>
 
                     {/* User Wallets Oversight */}
@@ -240,17 +392,16 @@ export default function AdminPage() {
                                     <thead className="text-xs text-gray-400 uppercase bg-black/40 border-b border-gray-800">
                                         <tr>
                                             <th className="px-4 py-3">User</th>
-                                            <th className="px-4 py-3">Joined</th>
                                             <th className="px-4 py-3 text-right">Main Wallet</th>
                                             <th className="px-4 py-3 text-right">Trading Pool</th>
                                             <th className="px-4 py-3 text-right">Profit Balance</th>
-                                            <th className="px-4 py-3 text-right text-emerald-400">Total Equity</th>
+                                            <th className="px-4 py-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-800">
                                         {users.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">No users found</td>
+                                                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">No users found</td>
                                             </tr>
                                         ) : (
                                             users.map((user: any) => {
@@ -261,9 +412,6 @@ export default function AdminPage() {
                                                             <div className="font-medium text-white">{user.name}</div>
                                                             <div className="text-xs text-gray-500">{user.email}</div>
                                                         </td>
-                                                        <td className="px-4 py-3 text-gray-400">
-                                                            {new Date(user.createdAt).toLocaleDateString()}
-                                                        </td>
                                                         <td className="px-4 py-3 text-right font-mono">
                                                             ${user.wallet.mainBalance.toFixed(2)}
                                                         </td>
@@ -273,8 +421,8 @@ export default function AdminPage() {
                                                         <td className="px-4 py-3 text-right font-mono text-emerald-400">
                                                             ${user.wallet.profitBalance.toFixed(2)}
                                                         </td>
-                                                        <td className="px-4 py-3 text-right font-bold text-white">
-                                                            ${totalEquity.toFixed(2)}
+                                                        <td className="px-4 py-3 text-right">
+                                                            <Button size="sm" variant="outline" className="h-8 shadow-sm" onClick={() => startEditUser(user)}>Edit</Button>
                                                         </td>
                                                     </tr>
                                                 )
@@ -287,6 +435,52 @@ export default function AdminPage() {
                     </Card>
                 </div>
             </div>
+
+            {/* Edit User Dialog */}
+            {isEditOpen && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <Card className="w-full max-w-md bg-gray-900 border-gray-800 shadow-2xl">
+                        <CardHeader>
+                            <CardTitle>Edit User Wallet</CardTitle>
+                            <CardDescription>Manually adjust balances for {editingUser?.name}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs text-gray-400">Main Wallet Balance</label>
+                                <Input
+                                    type="number"
+                                    value={editForm.mainBalance}
+                                    onChange={(e) => setEditForm({ ...editForm, mainBalance: parseFloat(e.target.value) })}
+                                    className="bg-black border-gray-700"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs text-gray-400">Trading Pool Balance</label>
+                                <Input
+                                    type="number"
+                                    value={editForm.tradingBalance}
+                                    onChange={(e) => setEditForm({ ...editForm, tradingBalance: parseFloat(e.target.value) })}
+                                    className="bg-black border-gray-700"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs text-gray-400">Profit Balance</label>
+                                <Input
+                                    type="number"
+                                    value={editForm.profitBalance}
+                                    onChange={(e) => setEditForm({ ...editForm, profitBalance: parseFloat(e.target.value) })}
+                                    className="bg-black border-gray-700"
+                                />
+                            </div>
+                            <div className="flex gap-2 pt-4">
+                                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={handleUpdateWallet}>Save Changes</Button>
+                                <Button className="flex-1" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
         </div>
     )
 }
+
