@@ -24,25 +24,64 @@ export async function GET() {
         );
 
         // Sort by date/time (closest to now)
+        // Helper to parse FF date string (MM-DD-YYYY) and time (1:30pm)
+        const parseFFDate = (dateStr: string, timeStr: string) => {
+            // Handle "All Day" or missing time
+            if (!timeStr || timeStr.toLowerCase().includes('day')) {
+                const [m, d, y] = dateStr.split('-');
+                return new Date(Number(y), Number(m) - 1, Number(d), 23, 59, 0); // End of day
+            }
+
+            const [m, d, y] = dateStr.split('-');
+
+            // Time parsing (e.g., "1:30pm")
+            const match = timeStr.match(/(\d+):(\d+)([ap]m)/i);
+            if (!match) return new Date(); // Fallback
+
+            let [_, valH, valM, meridiem] = match;
+            let hours = Number(valH);
+            const minutes = Number(valM);
+
+            if (meridiem.toLowerCase() === 'pm' && hours < 12) hours += 12;
+            if (meridiem.toLowerCase() === 'am' && hours === 12) hours = 0;
+
+            // Note: FF times in the XML are often loosely East Coast US. 
+            // For simplicity, we create a date object. Ideal would be strictly handling timezones 
+            // but relative sorting is usually enough for "upcoming".
+            return new Date(Number(y), Number(m) - 1, Number(d), hours, minutes);
+        };
+
         const now = new Date();
-        const upcomingEvents = highImpactEvents
-            .map((e: any) => {
-                // FF date format: "MM-DD-YYYY"
-                // FF time format: "2:30pm"
-                // Construct ISO string is tricky without timezone. FF usually uses NY time or server time? 
-                // Actually the XML usually has `date` and `time`.
-                // Let's just return the raw string and handle simplistic display or simple sorting.
-                return {
-                    title: e.title,
-                    country: e.country,
-                    date: e.date,
-                    time: e.time,
-                    impact: e.impact,
-                    forecast: e.forecast || "",
-                    previous: e.previous || ""
-                };
-            })
-            .slice(0, 5); // Take top 5
+
+        // 1. Map to objects with parsed Date
+        const mappedEvents = highImpactEvents.map((e: any) => {
+            const eventDate = parseFFDate(e.date, e.time);
+            return {
+                raw: e,
+                timestamp: eventDate.getTime(),
+                formattedDate: eventDate
+            };
+        });
+
+        // 2. Filter for future events only (or very recent past like last 1 hour)
+        //    Buffer of 1 hour (3600000 ms) to keep "just released" news for a bit.
+        const futureEvents = mappedEvents.filter(e => e.timestamp > (now.getTime() - 3600000));
+
+        // 3. Sort by time ascending (closest first)
+        futureEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+        // 4. Transform back to simple response format & Slice top 5
+        const upcomingEvents = futureEvents
+            .slice(0, 5)
+            .map(item => ({
+                title: item.raw.title,
+                country: item.raw.country,
+                date: item.raw.date,
+                time: item.raw.time,
+                impact: item.raw.impact,
+                forecast: item.raw.forecast || "",
+                previous: item.raw.previous || ""
+            }));
 
         return NextResponse.json(upcomingEvents);
 
