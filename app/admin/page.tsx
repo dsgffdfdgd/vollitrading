@@ -393,7 +393,7 @@ export default function AdminPage() {
                                         <tr>
                                             <th className="px-4 py-3">User</th>
                                             <th className="px-4 py-3 text-right">Main Wallet</th>
-                                            <th className="px-4 py-3 text-right">Trading Pool</th>
+                                            <th className="px-4 py-3 text-right">Active Trading (Pool A)</th>
                                             <th className="px-4 py-3 text-right">Profit Balance</th>
                                             <th className="px-4 py-3 text-right">Actions</th>
                                         </tr>
@@ -455,7 +455,7 @@ export default function AdminPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs text-gray-400">Trading Pool Balance</label>
+                                <label className="text-xs text-gray-400">Active Trading (Pool A)</label>
                                 <Input
                                     type="number"
                                     value={editForm.tradingBalance}
