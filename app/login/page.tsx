@@ -97,7 +97,7 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="password">Password</Label>
-                                    <Link href="#" className="text-xs text-primary hover:underline">Forgot password?</Link>
+                                    <Link href="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
                                 </div>
                                 <div className="relative">
                                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -150,7 +150,7 @@ export default function LoginPage() {
                                 </span>
                             </div>
                         </div>
-                        <Button variant="outline" className="w-full" type="button">
+                        <Button variant="outline" className="w-full" type="button" onClick={() => toast.info("Google Login is coming soon")}>
                             Google
                         </Button>
                         <p className="text-center text-sm text-muted-foreground mt-2">
