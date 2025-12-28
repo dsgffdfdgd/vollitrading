@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Home, Wallet, History, Settings, LogOut, PieChart } from "lucide-react"
+import { BarChart3, Home, Wallet, History, Settings, LogOut, PieChart, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -12,6 +12,7 @@ const navigation = [
     { name: "Live Trading", href: "/dashboard/trading", icon: BarChart3 },
     { name: "Performance", href: "/dashboard/performance", icon: PieChart },
     { name: "Transactions", href: "/dashboard/transactions", icon: History },
+    { name: "Admin Panel", href: "/admin", icon: ShieldCheck },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 

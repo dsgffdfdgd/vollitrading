@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Users, DollarSign, TrendingUp, Settings } from "lucide-react"
@@ -106,14 +107,14 @@ export default function AdminPage() {
         }
     }
 
-    // ... existing handlers ...
-
     return (
         <div className="flex h-screen bg-gray-950 text-white">
             {/* Same Sidebar ... */}
             <div className="w-64 border-r border-gray-800 p-6 space-y-4">
                 <h1 className="text-xl font-bold mb-8">VOLLIFX ADMIN</h1>
-                <Button variant="ghost" className="w-full justify-start text-emerald-400 bg-emerald-400/10">Dashboard</Button>
+                <Link href="/dashboard">
+                    <Button variant="ghost" className="w-full justify-start text-emerald-400 bg-emerald-400/10">Dashboard</Button>
+                </Link>
                 {/* ... */}
             </div>
 
