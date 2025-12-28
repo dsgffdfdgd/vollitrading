@@ -8,6 +8,8 @@ import { Menu, X, ChevronRight, BarChart2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
+import { ModeToggle } from "@/components/mode-toggle"
+
 const navigation = [
     { name: "Features", href: "/#features" },
     { name: "How it Works", href: "/#how-it-works" },
@@ -74,10 +76,6 @@ export function Navbar() {
                         </Link>
                     ))}
                 </div>
-
-                import {ModeToggle} from "@/components/mode-toggle"
-
-                // ... existing code ...
 
                 <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-4">
                     <ModeToggle />
