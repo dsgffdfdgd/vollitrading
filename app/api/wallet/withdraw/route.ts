@@ -31,8 +31,8 @@ export async function POST(req: Request) {
         const { amount, method, address } = await req.json();
         const withdrawAmount = parseFloat(amount);
 
-        if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
-            return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+        if (isNaN(withdrawAmount) || withdrawAmount < 50) {
+            return NextResponse.json({ error: "Minimum withdrawal is $50" }, { status: 400 });
         }
 
         if (user.wallet.profitBalance < withdrawAmount) {

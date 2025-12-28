@@ -28,6 +28,9 @@ function WalletContent() {
     const [depositAmount, setDepositAmount] = useState("")
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("crypto")
     const [isLoading, setIsLoading] = useState(false)
+    const [withdrawMethod, setWithdrawMethod] = useState("USDT")
+    const [withdrawAddress, setWithdrawAddress] = useState("")
+    const [withdrawAmountInput, setWithdrawAmountInput] = useState("")
     const [cardDetails, setCardDetails] = useState({
         number: "",
         name: "",
@@ -181,27 +184,38 @@ function WalletContent() {
     }
 
     const handleWithdrawProfit = async () => {
-        if (profitBalance <= 0) {
-            toast.error("No profits available to withdraw")
+        const amount = parseFloat(withdrawAmountInput)
+
+        if (isNaN(amount) || amount < 50) {
+            toast.error("Minimum withdrawal amount is $50")
             return
         }
 
-        // Simplified inputs for now - assuming user wants to withdraw ALL profits
-        // In a real app, you'd want inputs for amount/address in the dialog state
+        if (amount > profitBalance) {
+            toast.error("Insufficient profit balance")
+            return
+        }
+
+        if (!withdrawAddress) {
+            toast.error("Please provide withdrawal details (Address/Account/Email)")
+            return
+        }
+
         try {
             const res = await fetch('/api/wallet/withdraw', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    amount: profitBalance,
-                    method: "USDT", // Default for now
-                    address: "Requested via Dialog"
+                    amount: amount,
+                    method: withdrawMethod,
+                    address: withdrawAddress
                 })
             });
 
             if (res.ok) {
                 toast.success("Withdrawal request submitted for approval.");
-                setProfitBalance(0);
+                setProfitBalance(prev => prev - amount); // Optimistic Update
+                setWithdrawAmountInput("");
             } else {
                 const data = await res.json();
                 toast.error(data.error || "Withdrawal failed");
@@ -301,7 +315,7 @@ function WalletContent() {
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Withdraw Profits</DialogTitle>
-                                        <DialogDescription>Withdraw your trading profits to your external wallet.</DialogDescription>
+                                        <DialogDescription>Withdraw your trading profits to your external wallet. Minimum withdrawal is $50.</DialogDescription>
                                     </DialogHeader>
                                     <div className="py-4">
                                         <div className="text-sm text-gray-400 mb-2">Available Profits</div>
@@ -310,14 +324,41 @@ function WalletContent() {
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <label className="text-sm">Withdrawal Method</label>
-                                            <select className="w-full p-2 rounded-md bg-white/5 border border-white/10">
-                                                <option>USDT (TRC20)</option>
-                                                <option>Bitcoin (BTC)</option>
+                                            <select
+                                                className="w-full p-2 rounded-md bg-white/5 border border-white/10"
+                                                value={withdrawMethod}
+                                                onChange={(e) => setWithdrawMethod(e.target.value)}
+                                            >
+                                                <option value="USDT">USDT (TRC20)</option>
+                                                <option value="BTC">Bitcoin (BTC)</option>
+                                                <option value="ETH">Ethereum (ETH)</option>
+                                                <option value="BANK">Bank Transfer</option>
+                                                <option value="PAYPAL">PayPal</option>
+                                                <option value="PAYONEER">Payoneer</option>
                                             </select>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm">Wallet Address / Number</label>
-                                            <Input placeholder="Enter destination details" />
+                                            <label className="text-sm">
+                                                {withdrawMethod === 'BANK' ? 'Account Number/IBAN' :
+                                                    withdrawMethod.includes('PAY') ? 'Email Address' : 'Wallet Address'}
+                                            </label>
+                                            <Input
+                                                placeholder={
+                                                    withdrawMethod === 'BANK' ? "Enter IBAN/Account" :
+                                                        withdrawMethod.includes('PAY') ? "Enter Email" : "Enter Wallet Address"
+                                                }
+                                                value={withdrawAddress}
+                                                onChange={(e) => setWithdrawAddress(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm">Amount</label>
+                                            <Input
+                                                type="number"
+                                                placeholder="Min $50"
+                                                value={withdrawAmountInput}
+                                                onChange={(e) => setWithdrawAmountInput(e.target.value)}
+                                            />
                                         </div>
                                     </div>
                                     <DialogFooter className="mt-4">
