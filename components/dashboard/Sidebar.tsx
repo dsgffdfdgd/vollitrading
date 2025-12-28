@@ -50,12 +50,17 @@ export function Sidebar({ className }: { className?: string }) {
 
             <div className="p-4 border-t border-border">
 
-                <Link href="/">
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-destructive">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                    </Button>
-                </Link>
+                <Button
+                    variant="ghost"
+                    className="w-full justify-start text-muted-foreground hover:text-destructive"
+                    onClick={async () => {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        window.location.href = '/login';
+                    }}
+                >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                </Button>
             </div>
         </div>
     )

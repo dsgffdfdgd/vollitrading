@@ -33,6 +33,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
         }
 
+        // Check Passcode
+        if (user.passcode) {
+            const { passcode } = body;
+            if (!passcode) {
+                return NextResponse.json({ error: "Passcode required", requirePasscode: true }, { status: 403 });
+            }
+            if (passcode !== user.passcode) {
+                return NextResponse.json({ error: "Invalid passcode" }, { status: 401 });
+            }
+        }
+
         // Create JWT
         const token = jwt.sign(
             { userId: user.id, email: user.email, role: user.role },

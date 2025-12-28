@@ -15,6 +15,7 @@ model User {
   name          String?
   email         String    @unique
   password      String
+  passcode      String?   // New 6-digit pin for login
   role          String    @default("USER") // USER, ADMIN
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
