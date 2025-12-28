@@ -75,7 +75,12 @@ export function Navbar() {
                     ))}
                 </div>
 
+                import {ModeToggle} from "@/components/mode-toggle"
+
+                // ... existing code ...
+
                 <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-4">
+                    <ModeToggle />
                     <Link href="/login">
                         <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/5">
                             Log in
