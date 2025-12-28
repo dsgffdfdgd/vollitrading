@@ -29,19 +29,21 @@ export async function GET() {
         if (stats) {
             return NextResponse.json({
                 activeTraders: stats.activeTraders,
-                pooledCapital: stats.pooledCapital
+                pooledCapital: stats.pooledCapital,
+                activeTradingDisplay: stats.activeTradingDisplay || 0
             });
         }
 
         // Default values if DB is empty
         return NextResponse.json({
             activeTraders: 1240,
-            pooledCapital: 2400000
+            pooledCapital: 2400000,
+            activeTradingDisplay: 0
         });
 
     } catch (error) {
         console.error("Stats Fetch Error:", error);
-        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000 });
+        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0 });
     }
 }
 
@@ -53,7 +55,7 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { activeTraders, pooledCapital } = body;
+        const { activeTraders, pooledCapital, activeTradingDisplay } = body;
 
         // Upsert: Create if no record exists, otherwise update the first one found.
         // Since we don't have a known ID, we can do:
@@ -70,14 +72,16 @@ export async function POST(req: Request) {
                 where: { id: existing.id },
                 data: {
                     activeTraders: Number(activeTraders),
-                    pooledCapital: Number(pooledCapital)
+                    pooledCapital: Number(pooledCapital),
+                    activeTradingDisplay: Number(activeTradingDisplay || 0)
                 }
             });
         } else {
             result = await prisma.platformStat.create({
                 data: {
                     activeTraders: Number(activeTraders),
-                    pooledCapital: Number(pooledCapital)
+                    pooledCapital: Number(pooledCapital),
+                    activeTradingDisplay: Number(activeTradingDisplay || 0)
                 }
             });
         }
