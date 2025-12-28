@@ -6,18 +6,40 @@ import { BarChart3, Home, Wallet, History, Settings, LogOut, PieChart, ShieldChe
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+// ... imports ...
+import { useState, useEffect } from "react"
+
 const navigation = [
     { name: "Overview", href: "/dashboard", icon: Home },
     { name: "My Wallet", href: "/dashboard/wallet", icon: Wallet },
     { name: "Live Trading", href: "/dashboard/trading", icon: BarChart3 },
     { name: "Performance", href: "/dashboard/performance", icon: PieChart },
     { name: "Transactions", href: "/dashboard/transactions", icon: History },
-    { name: "Admin Panel", href: "/admin", icon: ShieldCheck },
+    // Admin Panel is conditionally added
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
 export function Sidebar({ className, onClose }: { className?: string, onClose?: () => void }) {
     const pathname = usePathname()
+    const [isAdmin, setIsAdmin] = useState(false)
+
+    useEffect(() => {
+        fetch("/api/auth/me")
+            .then(res => res.json())
+            .then(data => {
+                if (data?.user?.email === "allankipkoech65@gmail.com") {
+                    setIsAdmin(true)
+                }
+            })
+            .catch(err => console.error(err))
+    }, [])
+
+    const displayedNavigation = [...navigation];
+    // Insert Admin Panel if admin
+    if (isAdmin) {
+        // Insert before Settings (last item)
+        displayedNavigation.splice(displayedNavigation.length - 1, 0, { name: "Admin Panel", href: "/admin", icon: ShieldCheck });
+    }
 
     return (
         <div className={cn("flex flex-col h-full w-64 bg-card border-r border-border", className)}>
@@ -29,7 +51,7 @@ export function Sidebar({ className, onClose }: { className?: string, onClose?: 
             </div>
 
             <div className="flex-1 px-4 py-4 space-y-1">
-                {navigation.map((item) => {
+                {displayedNavigation.map((item) => {
                     const isActive = pathname === item.href
                     return (
                         <Link
@@ -51,7 +73,6 @@ export function Sidebar({ className, onClose }: { className?: string, onClose?: 
             </div>
 
             <div className="p-4 border-t border-border">
-
                 <Button
                     variant="ghost"
                     className="w-full justify-start text-muted-foreground hover:text-destructive"

@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-this";
+const ADMIN_EMAIL = "allankipkoech65@gmail.com";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+async function checkAdmin() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) return false;
+    try {
+        const decoded: any = jwt.verify(token, JWT_SECRET);
+        return decoded.email === ADMIN_EMAIL;
+    } catch { return false; }
+}
+
 // GET: List all pending deposits
 export async function GET() {
+    if (!(await checkAdmin())) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     console.log("Admin: Fetching pending deposits...");
     try {
         const pendingDeposits = await prisma.transaction.findMany({
@@ -39,6 +58,10 @@ export async function GET() {
 
 // PUT: Approve a deposit
 export async function PUT(req: Request) {
+    if (!(await checkAdmin())) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
         const { transactionId, action } = await req.json(); // action: 'APPROVE' or 'REJECT'
 
