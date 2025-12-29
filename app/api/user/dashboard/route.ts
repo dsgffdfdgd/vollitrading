@@ -56,10 +56,8 @@ export async function GET(req: Request) {
             walletId: user.wallet.id,
             equity: (user.wallet.mainBalance + user.wallet.tradingBalance + user.wallet.profitBalance) || 0,
 
-            // Use Global Active Trading Config if available, else fallback to user's allocated
-            activeTrading: (stats?.activeTradingDisplay && stats.activeTradingDisplay > 0)
-                ? stats.activeTradingDisplay
-                : (user.wallet.tradingBalance || 0),
+            // Use User's specific trading balance for Live Trading
+            activeTrading: user.wallet.tradingBalance || 0,
 
             profit: user.wallet.profitBalance || 0,
             mainBalance: user.wallet.mainBalance || 0,
