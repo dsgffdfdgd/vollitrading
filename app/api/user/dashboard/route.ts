@@ -65,6 +65,10 @@ export async function GET(req: Request) {
                 tradingBalance: user.wallet.tradingBalance || 0,
                 profitBalance: user.wallet.profitBalance || 0,
             },
+            user: {
+                name: user.name,
+                email: user.email
+            },
             recentActivity: user.wallet.transactions.map((t: any) => ({
                 id: t.id,
                 name: t.type === 'DEPOSIT' ? `Deposit (${t.status})` : t.type,
