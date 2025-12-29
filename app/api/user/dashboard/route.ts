@@ -65,8 +65,8 @@ export async function GET(req: Request) {
             liveTradingData: stats?.liveTradingData || null,
 
             // Global Stats
-            activeTraders: stats?.activeTraders || 1240,
-            pooledCapital: stats?.pooledCapital || 24000000,
+            activeTraders: stats?.activeTraders || 15,
+            pooledCapital: stats?.pooledCapital || 12764,
 
             wallet: { // Nested object for WalletPage compatibility
                 id: user.wallet.id,
