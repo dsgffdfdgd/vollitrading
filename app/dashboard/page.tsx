@@ -122,7 +122,7 @@ export default function DashboardPage() {
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Trading</CardTitle>
+                        <CardTitle className="text-sm font-medium">Live Trading</CardTitle>
                         <Activity className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4">
                     <CardHeader>
-                        <CardTitle>Performance Overview</CardTitle>
+                        <CardTitle>Trading Performance</CardTitle>
                         <CardDescription>
                             Live equity curve tracking your allocated capital performance.
                         </CardDescription>
