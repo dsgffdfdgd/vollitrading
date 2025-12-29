@@ -23,7 +23,7 @@ export function Hero() {
     const [stats, setStats] = useState({ activeTraders: 12450, pooledCapital: 25000000 })
 
     useEffect(() => {
-        fetch('/api/admin/stats')
+        fetch(`/api/admin/stats?t=${Date.now()}`)
             .then(res => res.json())
             .then(data => {
                 if (data.activeTraders) {

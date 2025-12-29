@@ -574,15 +574,43 @@ export default function AdminPage() {
                                         placeholder='{"totalReturn": "+124.5%", "sharpeRatio": "1.84", "monthlyReturns": [...]}'
                                     />
                                 </div>
-                                <div className="flex gap-2 pt-4">
-                                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={handleUpdateWallet}>Save Changes</Button>
-                                    <Button className="flex-1" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={handleUpdateWallet}>Save Changes</Button>
+                                <Button className="flex-1" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            </div>
+                            <div className="border-t border-gray-800 pt-4 mt-4">
+                                <Button
+                                    variant="destructive"
+                                    className="w-full bg-red-900/50 hover:bg-red-900 text-red-200 border border-red-800"
+                                    onClick={async () => {
+                                        if (window.confirm(`Are you absolutely sure you want to delete user ${editingUser?.name}? This action CANNOT be undone.`)) {
+                                            const loadingToast = toast.loading("Deleting user...")
+                                            try {
+                                                const res = await fetch(`/api/admin/users/delete?userId=${editingUser.id}`, { method: 'DELETE' })
+                                                if (res.ok) {
+                                                    toast.success("User deleted permanently", { id: loadingToast })
+                                                    setIsEditOpen(false)
+                                                    fetchUsers()
+                                                } else {
+                                                    const data = await res.json()
+                                                    toast.error(data.error || "Failed to delete user", { id: loadingToast })
+                                                }
+                                            } catch (e) {
+                                                toast.error("Network error", { id: loadingToast })
+                                            }
+                                        }
+                                    }}
+                                >
+                                    Delete User Permanently
+                                </Button>
+                                <p className="text-[10px] text-red-500/60 mt-2 text-center">
+                                    Warning: This will erase all user data, wallet balances, and transactions immediately.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
                     </div>
-                )
-            }
+    )
+}
         </div >
     )
 }
