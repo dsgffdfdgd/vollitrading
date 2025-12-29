@@ -20,6 +20,9 @@ export function Footer() {
                             <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Resources</h2>
                             <ul className="text-gray-500 dark:text-gray-400 font-medium">
                                 <li className="mb-4">
+                                    <Link href="/faq" className="hover:underline">FAQs</Link>
+                                </li>
+                                <li className="mb-4">
                                     <Link href="/legal" className="hover:underline">Documentation</Link>
                                 </li>
                                 <li>

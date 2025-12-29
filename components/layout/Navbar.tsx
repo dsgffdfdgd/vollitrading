@@ -15,6 +15,7 @@ const navigation = [
     { name: "How it Works", href: "/#how-it-works" },
     { name: "Live Markets", href: "/#markets" },
     { name: "About", href: "/about" },
+    { name: "FAQs", href: "/faq" },
 ]
 
 export function Navbar() {
