@@ -77,11 +77,11 @@ export function Hero() {
                         className="mt-14 grid grid-cols-3 gap-4 border-t border-border pt-8"
                     >
                         <div>
-                            <div className="text-3xl font-bold text-foreground">$25M+</div>
+                            <div className="text-3xl font-bold text-foreground">${(stats.pooledCapital / 1000000).toFixed(1)}M+</div>
                             <div className="text-sm text-muted-foreground">Volume Traded</div>
                         </div>
                         <div>
-                            <div className="text-3xl font-bold text-foreground">12k+</div>
+                            <div className="text-3xl font-bold text-foreground">{(stats.activeTraders / 1000).toFixed(1)}k+</div>
                             <div className="text-sm text-muted-foreground">Active Traders</div>
                         </div>
                         <div>
