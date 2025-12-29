@@ -194,7 +194,8 @@ export default function AdminPage() {
                 body: JSON.stringify({
                     userId: editingUser.id,
                     ...editForm,
-                    chartData: parsedChartData
+                    chartData: parsedChartData,
+                    performanceMetrics: parsedPerformanceMetrics
                 })
             })
 

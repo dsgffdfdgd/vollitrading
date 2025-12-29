@@ -61,6 +61,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true });
         } else {
             console.log("SMTP not configured. Link logged to console only.");
+            // In Development, return the link so the user can actually reset the password without SMTP
+            if (process.env.NODE_ENV !== 'production') {
+                return NextResponse.json({ success: true, debugLink: resetLink, warning: "SMTP not configured. Link returned for dev." });
+            }
         }
 
         return NextResponse.json({ success: true });
