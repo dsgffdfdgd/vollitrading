@@ -325,16 +325,7 @@ export default function AdminPage() {
                                         Shown as "Volume Traded" on landing page ($XX.XM+).
                                     </p>
                                 </div>
-                                <div className="space-y-2 col-span-2">
-                                    <label className="text-xs text-emerald-400 font-bold">Allocated to Pool A (User Dashboard Display)</label>
-                                    <Input
-                                        type="number"
-                                        value={stats.activeTradingDisplay}
-                                        onChange={(e) => setStats({ ...stats, activeTradingDisplay: Number(e.target.value) })}
-                                        className="bg-black border-emerald-500/50"
-                                        placeholder="Amount to show on every user's 'Active Trading' card"
-                                    />
-                                </div>
+                                {/* Removed global activeTradingDisplay as it is now per-user */}
                             </div>
 
                             <div className="space-y-4 mt-4">
