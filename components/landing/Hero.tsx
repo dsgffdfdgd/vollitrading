@@ -20,7 +20,7 @@ const chartData = [
 ]
 
 export function Hero() {
-    const [stats, setStats] = useState({ activeTraders: 12450, pooledCapital: 25000000 })
+    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 24000000 })
 
     useEffect(() => {
         fetch(`/api/admin/stats?t=${Date.now()}`)
