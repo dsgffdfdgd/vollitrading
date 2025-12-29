@@ -4,6 +4,7 @@ import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowUpRight, DollarSign, Wallet, TrendingUp, Activity, RefreshCw, Globe, Calendar, BarChart, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 
@@ -168,35 +169,55 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            {/* Platform Ecosystem Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-gradient-to-br from-gray-900 to-black border-gray-800">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-400">Platform Volume</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-emerald-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-                            ${(dashboardData.pooledCapital / 1000000).toFixed(1)}M+
+            {/* Live Trading Ticker */}
+            <div className="w-full">
+                <Card className="bg-gradient-to-br from-gray-900 to-black border-gray-800 overflow-hidden">
+                    <CardContent className="p-4">
+                        <div className="relative w-full flex overflow-hidden max-w-full" style={{ maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)' }}>
+                            <motion.div
+                                className="flex gap-16 whitespace-nowrap items-center"
+                                animate={{ x: ["0%", "-50%"] }}
+                                transition={{ repeat: Infinity, ease: "linear", duration: 30 }}
+                            >
+                                {/* Duplicated List for Infinite Loop (x3 for safety / wider screens) */}
+                                {[...Array(3)].map((_, i) => (
+                                    <div key={i} className="flex gap-16 items-center">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">EUR/USD</span>
+                                            <span className="text-sm font-bold text-emerald-500">1.0942 <span className="text-[10px] opacity-70">▲ 0.12%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">GBP/USD</span>
+                                            <span className="text-sm font-bold text-emerald-500">1.2730 <span className="text-[10px] opacity-70">▲ 0.45%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">XAU/USD</span>
+                                            <span className="text-sm font-bold text-red-500">2,036.50 <span className="text-[10px] opacity-70">▼ 0.05%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">BTC/USD</span>
+                                            <span className="text-sm font-bold text-emerald-500">64,230.10 <span className="text-[10px] opacity-70">▲ 2.10%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">NAS100</span>
+                                            <span className="text-sm font-bold text-emerald-500">16,840.40 <span className="text-[10px] opacity-70">▲ 1.15%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">US30</span>
+                                            <span className="text-sm font-bold text-red-500">37,450.00 <span className="text-[10px] opacity-70">▼ 0.22%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">USD/JPY</span>
+                                            <span className="text-sm font-bold text-emerald-500">148.12 <span className="text-[10px] opacity-70">▲ 0.08%</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-muted-foreground font-bold font-mono tracking-wider">ETH/USD</span>
+                                            <span className="text-sm font-bold text-emerald-500">3,450.20 <span className="text-[10px] opacity-70">▲ 1.50%</span></span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </motion.div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Total volume traded globally
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-gradient-to-br from-gray-900 to-black border-gray-800">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-400">Active Traders</CardTitle>
-                        <Users className="h-4 w-4 text-blue-600" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-                            {(dashboardData.activeTraders / 1000).toFixed(1)}k+
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Traders currently active
-                        </p>
                     </CardContent>
                 </Card>
             </div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { ArrowRight, BarChart2, ShieldCheck, TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { useState, useEffect } from "react"
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 const chartData = [
     { time: '10:00', xau: 2024.50 },
@@ -20,21 +20,9 @@ const chartData = [
 ]
 
 export function Hero() {
-    const [stats, setStats] = useState({ activeTraders: 12, pooledCapital: 7000 })
 
-    useEffect(() => {
-        fetch(`/api/admin/stats?t=${Date.now()}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.activeTraders) {
-                    setStats({
-                        activeTraders: data.activeTraders,
-                        pooledCapital: data.pooledCapital
-                    })
-                }
-            })
-            .catch(err => console.error("Failed to fetch landing stats", err))
-    }, [])
+
+
 
     return (
         <div className="relative overflow-hidden bg-background pt-14 border-b">
@@ -89,19 +77,49 @@ export function Hero() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 0.5 }}
-                        className="mt-14 grid grid-cols-3 gap-4 border-t border-border pt-8"
+                        className="mt-14 border-t border-border pt-8 w-full overflow-hidden"
                     >
-                        <div>
-                            <div className="text-3xl font-bold text-foreground">${(stats.pooledCapital / 1000000).toFixed(1)}M+</div>
-                            <div className="text-sm text-muted-foreground">Volume Traded</div>
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-foreground">{(stats.activeTraders / 1000).toFixed(1)}k+</div>
-                            <div className="text-sm text-muted-foreground">Active Traders</div>
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-foreground"><span className="text-emerald-500">99.9%</span></div>
-                            <div className="text-sm text-muted-foreground">Uptime</div>
+                        {/* Live Trading Ticker */}
+                        <div className="relative w-full flex overflow-hidden mask-linear-gradient" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+                            <motion.div
+                                className="flex gap-12 whitespace-nowrap"
+                                animate={{ x: ["0%", "-50%"] }}
+                                transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+                            >
+                                {/* Duplicated List for Infinite Loop */}
+                                {[...Array(2)].map((_, i) => (
+                                    <div key={i} className="flex gap-12 items-center">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">EUR/USD</span>
+                                            <span className="text-lg font-bold text-emerald-500">1.0942 <span className="text-xs">▲</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">GBP/USD</span>
+                                            <span className="text-lg font-bold text-emerald-500">1.2730 <span className="text-xs">▲</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">XAU/USD</span>
+                                            <span className="text-lg font-bold text-red-500">2,036.50 <span className="text-xs">▼</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">BTC/USD</span>
+                                            <span className="text-lg font-bold text-emerald-500">64,230.10 <span className="text-xs">▲</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">NAS100</span>
+                                            <span className="text-lg font-bold text-emerald-500">16,840.40 <span className="text-xs">▲</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">US30</span>
+                                            <span className="text-lg font-bold text-red-500">37,450.00 <span className="text-xs">▼</span></span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground font-bold font-mono">USD/JPY</span>
+                                            <span className="text-lg font-bold text-emerald-500">148.12 <span className="text-xs">▲</span></span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </motion.div>
                         </div>
                     </motion.div>
                 </div>
