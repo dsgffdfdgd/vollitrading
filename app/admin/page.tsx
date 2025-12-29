@@ -87,7 +87,9 @@ export default function AdminPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...stats,
+                    activeTraders: Number(stats.activeTraders),
+                    pooledCapital: Number(stats.pooledCapital),
+                    activeTradingDisplay: Number(stats.activeTradingDisplay),
                     sentimentData: parsedSentiment,
                     liveTradingData: parsedLiveTrading
                 })
