@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { ArrowRight, BarChart2, ShieldCheck, TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+
 
 const chartData = [
     { time: '10:00', xau: 2024.50 },
