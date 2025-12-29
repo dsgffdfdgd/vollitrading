@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { ArrowRight, BarChart2, ShieldCheck, TrendingUp } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useState, useEffect } from "react"
 
 const chartData = [
     { time: '10:00', xau: 2024.50 },
@@ -19,10 +20,24 @@ const chartData = [
 ]
 
 export function Hero() {
+    const [stats, setStats] = useState({ activeTraders: 12450, pooledCapital: 25000000 })
+
+    useEffect(() => {
+        fetch('/api/admin/stats')
+            .then(res => res.json())
+            .then(data => {
+                if (data.activeTraders) {
+                    setStats({
+                        activeTraders: data.activeTraders,
+                        pooledCapital: data.pooledCapital
+                    })
+                }
+            })
+            .catch(err => console.error("Failed to fetch landing stats", err))
+    }, [])
+
     return (
         <div className="relative overflow-hidden bg-background pt-14 border-b">
-
-
             <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
                 <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
                     <motion.div
