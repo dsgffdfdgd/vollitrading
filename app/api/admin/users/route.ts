@@ -27,10 +27,11 @@ export async function GET() {
     try {
         // Use raw query to ensure we get chartData and performanceMetrics
         const usersRaw: any[] = await prisma.$queryRaw`
-            SELECT u.id, u.name, u.email, u."createdAt", 
+            SELECT u.id, u.name, u.email, u."createdAt", u.deleted,
                    w."mainBalance", w."tradingBalance", w."profitBalance", w."chartData", w."performanceMetrics"
             FROM "User" u
             LEFT JOIN "Wallet" w ON u.id = w."userId"
+            WHERE u.deleted = false
             ORDER BY u."createdAt" DESC
         `;
 

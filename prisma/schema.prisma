@@ -19,6 +19,7 @@ model User {
   role          String    @default("USER") // USER, ADMIN
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  deleted       Boolean   @default(false)
   
   wallet        Wallet?
   trades        Trade[]

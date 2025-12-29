@@ -29,19 +29,13 @@ export async function DELETE(req: Request) {
             return NextResponse.json({ error: "User ID is required" }, { status: 400 });
         }
 
-        // 1. Delete associated data first to handle relations manually if Cascade is not set
-        // (Though CADE ON DELETE is standard, being explicit is safer)
-        await prisma.transaction.deleteMany({ where: { wallet: { userId } } });
-        await prisma.trade.deleteMany({ where: { userId } });
-        await prisma.notification.deleteMany({ where: { userId } });
+        // Soft Delete: Mark user as deleted
+        await prisma.user.update({
+            where: { id: userId },
+            data: { deleted: true }
+        });
 
-        // 2. Delete Wallet
-        await prisma.wallet.delete({ where: { userId } });
-
-        // 3. Delete User
-        await prisma.user.delete({ where: { id: userId } });
-
-        return NextResponse.json({ success: true, message: "User deleted successfully" });
+        return NextResponse.json({ success: true, message: "User account deactivated (soft deleted)" });
     } catch (error: any) {
         console.error("Delete User Error:", error);
         return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });

@@ -71,47 +71,20 @@ export async function POST(req: Request) {
         const liveTradingJson = liveTradingData ? JSON.stringify(liveTradingData) : null;
 
         if (existing) {
-            if (sentimentJson && liveTradingJson) {
-                await prisma.$executeRaw`
-                    UPDATE "PlatformStat" 
-                    SET "activeTraders" = ${Number(activeTraders)}, 
-                        "pooledCapital" = ${Number(pooledCapital)}, 
-                        "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
-                        "sentimentData" = ${sentimentJson}::jsonb,
-                        "liveTradingData" = ${liveTradingJson}::jsonb,
-                        "updatedAt" = NOW()
-                    WHERE id = ${existing.id}
-                `;
-            } else if (sentimentJson) {
-                await prisma.$executeRaw`
-                    UPDATE "PlatformStat" 
-                    SET "activeTraders" = ${Number(activeTraders)}, 
-                        "pooledCapital" = ${Number(pooledCapital)}, 
-                        "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
-                        "sentimentData" = ${sentimentJson}::jsonb,
-                        "updatedAt" = NOW()
-                    WHERE id = ${existing.id}
-                `;
-            } else if (liveTradingJson) {
-                await prisma.$executeRaw`
-                    UPDATE "PlatformStat" 
-                    SET "activeTraders" = ${Number(activeTraders)}, 
-                        "pooledCapital" = ${Number(pooledCapital)}, 
-                        "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
-                        "liveTradingData" = ${liveTradingJson}::jsonb,
-                        "updatedAt" = NOW()
-                    WHERE id = ${existing.id}
-                `;
-            } else {
-                await prisma.$executeRaw`
-                    UPDATE "PlatformStat" 
-                    SET "activeTraders" = ${Number(activeTraders)}, 
-                        "pooledCapital" = ${Number(pooledCapital)}, 
-                        "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
-                        "updatedAt" = NOW()
-                    WHERE id = ${existing.id}
-                `;
-            }
+            // Unified UPDATE query
+            // We expect the frontend to send the full state, so we overwrite.
+            // Explicitly cast JSONB variables to avoid type errors if they are null strings in JS (which become null in SQL)
+
+            await prisma.$executeRaw`
+                UPDATE "PlatformStat" 
+                SET "activeTraders" = ${Number(activeTraders)}, 
+                    "pooledCapital" = ${Number(pooledCapital)}, 
+                    "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
+                    "sentimentData" = ${sentimentJson}::jsonb,
+                    "liveTradingData" = ${liveTradingJson}::jsonb,
+                    "updatedAt" = NOW()
+                WHERE id = ${existing.id}
+            `;
         } else {
             const newId = 'global-stat-' + Date.now();
             await prisma.$executeRaw`
