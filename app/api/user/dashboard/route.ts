@@ -46,7 +46,7 @@ export async function GET(req: Request) {
         const performanceMetrics = walletExtra.performanceMetrics || null;
 
         // Fetch platform stats via raw query to avoid stale client issues
-        const statsRaw: any[] = await prisma.$queryRaw`SELECT "activeTradingDisplay", "sentimentData", "liveTradingData" FROM "PlatformStat" ORDER BY "updatedAt" DESC LIMIT 1`;
+        const statsRaw: any[] = await prisma.$queryRaw`SELECT "activeTradingDisplay", "sentimentData", "liveTradingData", "activeTraders", "pooledCapital" FROM "PlatformStat" ORDER BY "updatedAt" DESC LIMIT 1`;
         const stats = statsRaw[0];
 
         // Format for dashboard
