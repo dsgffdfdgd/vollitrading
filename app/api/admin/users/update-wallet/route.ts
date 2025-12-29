@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { userId, mainBalance, tradingBalance, profitBalance, chartData } = await req.json();
+        const { userId, mainBalance, tradingBalance, profitBalance, chartData, performanceMetrics } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ error: "User ID required" }, { status: 400 });
@@ -91,18 +91,25 @@ export async function POST(req: Request) {
             ...transactions
         ]);
 
-        // 4. Update Chart Data if provided (using raw query)
+        // 4. Update Chart Data and Performance Metrics if provided (using raw query)
+        const updates: any[] = [];
         if (chartData && Array.isArray(chartData)) {
-            try {
-                await prisma.$executeRaw`
-                    UPDATE "Wallet" 
-                    SET "chartData" = ${JSON.stringify(chartData)}::jsonb 
-                    WHERE "userId" = ${userId}
-                `;
-            } catch (e) {
-                console.error("Chart Update Failed:", e);
-            }
+            updates.push(prisma.$executeRaw`
+                UPDATE "Wallet" 
+                SET "chartData" = ${JSON.stringify(chartData)}::jsonb 
+                WHERE "userId" = ${userId}
+            `);
         }
+
+        if (performanceMetrics) {
+            updates.push(prisma.$executeRaw`
+                UPDATE "Wallet" 
+                SET "performanceMetrics" = ${JSON.stringify(performanceMetrics)}::jsonb 
+                WHERE "userId" = ${userId}
+            `);
+        }
+
+        await Promise.all(updates);
 
         return NextResponse.json({ success: true, message: "Wallet updated and transactions recorded" });
     } catch (error) {

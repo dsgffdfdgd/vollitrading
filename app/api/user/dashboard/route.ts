@@ -39,17 +39,15 @@ export async function GET(req: Request) {
             }
         });
 
+        // Fetch extra wallet data via raw query (chartData, performanceMetrics)
+        const walletRaw: any[] = await prisma.$queryRaw`SELECT "chartData", "performanceMetrics" FROM "Wallet" WHERE id = ${user.wallet.id}`;
+        const walletExtra = walletRaw[0] || {};
+        const chartData = walletExtra.chartData || null;
+        const performanceMetrics = walletExtra.performanceMetrics || null;
+
         // Fetch platform stats via raw query to avoid stale client issues
-        const statsRaw: any[] = await prisma.$queryRaw`SELECT "activeTradingDisplay", "sentimentData" FROM "PlatformStat" ORDER BY "updatedAt" DESC LIMIT 1`;
+        const statsRaw: any[] = await prisma.$queryRaw`SELECT "activeTradingDisplay", "sentimentData", "liveTradingData" FROM "PlatformStat" ORDER BY "updatedAt" DESC LIMIT 1`;
         const stats = statsRaw[0];
-
-        if (!user || !user.wallet) {
-            return NextResponse.json({ error: "User or Wallet not found" }, { status: 404 });
-        }
-
-        // Fetch extra wallet data via raw query (chartData)
-        const walletRaw: any[] = await prisma.$queryRaw`SELECT "chartData" FROM "Wallet" WHERE id = ${user.wallet.id}`;
-        const chartData = walletRaw[0]?.chartData || null;
 
         // Format for dashboard
         const dashboardData = {
@@ -62,7 +60,9 @@ export async function GET(req: Request) {
             profit: user.wallet.profitBalance || 0,
             mainBalance: user.wallet.mainBalance || 0,
             chartData: chartData,
+            performanceMetrics: performanceMetrics,
             sentimentData: stats?.sentimentData || null,
+            liveTradingData: stats?.liveTradingData || null,
             wallet: { // Nested object for WalletPage compatibility
                 id: user.wallet.id,
                 mainBalance: user.wallet.mainBalance || 0,

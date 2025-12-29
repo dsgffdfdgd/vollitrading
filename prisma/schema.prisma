@@ -33,6 +33,7 @@ model Wallet {
   tradingBalance Float       @default(0.0)
   profitBalance Float        @default(0.0)
   chartData     Json?
+  performanceMetrics Json? // Stores: totalReturn, sharpeRatio, maxDrawdown, winRate, monthlyReturns
   transactions Transaction[]
 }
 
@@ -77,5 +78,6 @@ model PlatformStat {
   pooledCapital Float    @default(0.0)
   activeTradingDisplay Float @default(0.0)
   sentimentData Json?
+  liveTradingData Json? // Stores: currentPnl, activePositions, masterPoolChart, exposure, nextSettlement
   updatedAt     DateTime @updatedAt
 }

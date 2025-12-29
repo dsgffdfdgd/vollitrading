@@ -32,7 +32,8 @@ export async function GET() {
                 activeTraders: stats.activeTraders || 1240,
                 pooledCapital: stats.pooledCapital || 2400000,
                 activeTradingDisplay: stats.activeTradingDisplay || 0,
-                sentimentData: stats.sentimentData || null
+                sentimentData: stats.sentimentData || null,
+                liveTradingData: stats.liveTradingData || null
             });
         }
 
@@ -41,12 +42,13 @@ export async function GET() {
             activeTraders: 1240,
             pooledCapital: 2400000,
             activeTradingDisplay: 0,
-            sentimentData: null
+            sentimentData: null,
+            liveTradingData: null
         });
 
     } catch (error) {
         console.error("Stats Fetch Error:", error);
-        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0, sentimentData: null });
+        return NextResponse.json({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0, sentimentData: null, liveTradingData: null });
     }
 }
 
@@ -58,23 +60,45 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { activeTraders, pooledCapital, activeTradingDisplay, sentimentData } = body;
+        const { activeTraders, pooledCapital, activeTradingDisplay, sentimentData, liveTradingData } = body;
 
         // Use raw queries to bypass stale client
         const statsRaw: any[] = await prisma.$queryRaw`SELECT * FROM "PlatformStat" ORDER BY "updatedAt" DESC LIMIT 1`;
         const existing = statsRaw[0];
 
-        // Format sentimentData as JSON string if present
+        // Format JSON strings
         const sentimentJson = sentimentData ? JSON.stringify(sentimentData) : null;
+        const liveTradingJson = liveTradingData ? JSON.stringify(liveTradingData) : null;
 
         if (existing) {
-            if (sentimentJson) {
+            if (sentimentJson && liveTradingJson) {
                 await prisma.$executeRaw`
                     UPDATE "PlatformStat" 
                     SET "activeTraders" = ${Number(activeTraders)}, 
                         "pooledCapital" = ${Number(pooledCapital)}, 
                         "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
                         "sentimentData" = ${sentimentJson}::jsonb,
+                        "liveTradingData" = ${liveTradingJson}::jsonb,
+                        "updatedAt" = NOW()
+                    WHERE id = ${existing.id}
+                `;
+            } else if (sentimentJson) {
+                await prisma.$executeRaw`
+                    UPDATE "PlatformStat" 
+                    SET "activeTraders" = ${Number(activeTraders)}, 
+                        "pooledCapital" = ${Number(pooledCapital)}, 
+                        "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
+                        "sentimentData" = ${sentimentJson}::jsonb,
+                        "updatedAt" = NOW()
+                    WHERE id = ${existing.id}
+                `;
+            } else if (liveTradingJson) {
+                await prisma.$executeRaw`
+                    UPDATE "PlatformStat" 
+                    SET "activeTraders" = ${Number(activeTraders)}, 
+                        "pooledCapital" = ${Number(pooledCapital)}, 
+                        "activeTradingDisplay" = ${Number(activeTradingDisplay || 0)},
+                        "liveTradingData" = ${liveTradingJson}::jsonb,
                         "updatedAt" = NOW()
                     WHERE id = ${existing.id}
                 `;
@@ -90,17 +114,10 @@ export async function POST(req: Request) {
             }
         } else {
             const newId = 'global-stat-' + Date.now();
-            if (sentimentJson) {
-                await prisma.$executeRaw`
-                    INSERT INTO "PlatformStat" (id, "activeTraders", "pooledCapital", "activeTradingDisplay", "sentimentData", "updatedAt")
-                    VALUES (${newId}, ${Number(activeTraders)}, ${Number(pooledCapital)}, ${Number(activeTradingDisplay || 0)}, ${sentimentJson}::jsonb, NOW())
-                `;
-            } else {
-                await prisma.$executeRaw`
-                    INSERT INTO "PlatformStat" (id, "activeTraders", "pooledCapital", "activeTradingDisplay", "updatedAt")
-                    VALUES (${newId}, ${Number(activeTraders)}, ${Number(pooledCapital)}, ${Number(activeTradingDisplay || 0)}, NOW())
-                `;
-            }
+            await prisma.$executeRaw`
+                INSERT INTO "PlatformStat" (id, "activeTraders", "pooledCapital", "activeTradingDisplay", "sentimentData", "liveTradingData", "updatedAt")
+                VALUES (${newId}, ${Number(activeTraders)}, ${Number(pooledCapital)}, ${Number(activeTradingDisplay || 0)}, ${sentimentJson}::jsonb, ${liveTradingJson}::jsonb, NOW())
+            `;
         }
 
         return NextResponse.json({ success: true, message: "Stats updated" });

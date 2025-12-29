@@ -11,7 +11,7 @@ import { useState, useEffect } from "react"
 
 export default function AdminPage() {
     // Profit Management State
-    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0, sentimentData: "" })
+    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0, sentimentData: "", liveTradingData: "" })
     const [profitInput, setProfitInput] = useState("")
 
     // Transaction & User Management State
@@ -21,7 +21,7 @@ export default function AdminPage() {
 
     // Edit User Wallet State
     const [editingUser, setEditingUser] = useState<any>(null)
-    const [editForm, setEditForm] = useState({ mainBalance: 0, tradingBalance: 0, profitBalance: 0, chartData: "" })
+    const [editForm, setEditForm] = useState({ mainBalance: 0, tradingBalance: 0, profitBalance: 0, chartData: "", performanceMetrics: "" })
     const [isEditOpen, setIsEditOpen] = useState(false)
 
     useEffect(() => {
@@ -52,7 +52,8 @@ export default function AdminPage() {
                     activeTraders: data.activeTraders || 1240,
                     pooledCapital: data.pooledCapital || 2400000,
                     activeTradingDisplay: data.activeTradingDisplay || 0,
-                    sentimentData: data.sentimentData ? JSON.stringify(data.sentimentData, null, 2) : ""
+                    sentimentData: data.sentimentData ? JSON.stringify(data.sentimentData, null, 2) : "",
+                    liveTradingData: data.liveTradingData ? JSON.stringify(data.liveTradingData, null, 2) : ""
                 })
             }
         } catch (error) {
@@ -72,12 +73,23 @@ export default function AdminPage() {
                 }
             }
 
+            let parsedLiveTrading = null;
+            if (stats.liveTradingData) {
+                try {
+                    parsedLiveTrading = JSON.parse(stats.liveTradingData);
+                } catch (e) {
+                    toast.error("Invalid JSON format for Live Trading Data");
+                    return;
+                }
+            }
+
             const res = await fetch('/api/admin/stats', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...stats,
-                    sentimentData: parsedSentiment
+                    sentimentData: parsedSentiment,
+                    liveTradingData: parsedLiveTrading
                 })
             })
 
@@ -145,7 +157,8 @@ export default function AdminPage() {
             mainBalance: user.wallet.mainBalance,
             tradingBalance: user.wallet.tradingBalance,
             profitBalance: user.wallet.profitBalance,
-            chartData: user.wallet.chartData ? JSON.stringify(user.wallet.chartData, null, 2) : ""
+            chartData: user.wallet.chartData ? JSON.stringify(user.wallet.chartData, null, 2) : "",
+            performanceMetrics: user.wallet.performanceMetrics ? JSON.stringify(user.wallet.performanceMetrics, null, 2) : ""
         })
         setIsEditOpen(true)
     }
@@ -159,6 +172,16 @@ export default function AdminPage() {
                 parsedChartData = JSON.parse(editForm.chartData);
             } catch (e) {
                 toast.error("Invalid JSON format for Chart Data");
+                return;
+            }
+        }
+
+        let parsedPerformanceMetrics = null;
+        if (editForm.performanceMetrics) {
+            try {
+                parsedPerformanceMetrics = JSON.parse(editForm.performanceMetrics);
+            } catch (e) {
+                toast.error("Invalid JSON format for Performance Metrics");
                 return;
             }
         }
@@ -310,17 +333,31 @@ export default function AdminPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2 mt-4">
-                                <label className="text-xs text-emerald-400 font-bold">Market Sentiment Data (JSON)</label>
-                                <textarea
-                                    value={stats.sentimentData}
-                                    onChange={(e) => setStats({ ...stats, sentimentData: e.target.value })}
-                                    className="w-full h-24 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono text-white"
-                                    placeholder='[{"symbol":"XAUUSD", "sentiment":65, "type":"Bullish"}, ...]'
-                                />
-                                <p className="text-[10px] text-gray-500">
-                                    Format: Array of objects with symbol, sentiment (0-100), and type ("Bullish"/"Bearish").
-                                </p>
+                            <div className="space-y-4 mt-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs text-emerald-400 font-bold">Market Sentiment Data (JSON)</label>
+                                    <textarea
+                                        value={stats.sentimentData}
+                                        onChange={(e) => setStats({ ...stats, sentimentData: e.target.value })}
+                                        className="w-full h-24 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono text-white"
+                                        placeholder='[{"symbol":"XAUUSD", "sentiment":65, "type":"Bullish"}, ...]'
+                                    />
+                                    <p className="text-[10px] text-gray-500">
+                                        Format: Array of objects with symbol, sentiment (0-100), and type ("Bullish"/"Bearish").
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs text-blue-400 font-bold">Live Trading Data (JSON)</label>
+                                    <textarea
+                                        value={stats.liveTradingData}
+                                        onChange={(e) => setStats({ ...stats, liveTradingData: e.target.value })}
+                                        className="w-full h-24 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono text-white"
+                                        placeholder='{"currentPnl": 2.37, "activePositions": [...], "allocation": {...}}'
+                                    />
+                                    <p className="text-[10px] text-gray-500">
+                                        Controls the "Live Trading" page stats (PNL, positions, etc).
+                                    </p>
+                                </div>
                             </div>
 
                             <Button className="w-full bg-blue-600 hover:bg-blue-700 mt-4" onClick={handleUpdateStats}>
@@ -531,6 +568,15 @@ export default function AdminPage() {
                                         onChange={(e) => setEditForm({ ...editForm, chartData: e.target.value })}
                                         className="w-full h-32 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono"
                                         placeholder='[{"date":"Mon","value":100},{"date":"Tue","value":150}]'
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs text-gray-400">Performance Metrics (JSON)</label>
+                                    <textarea
+                                        value={editForm.performanceMetrics}
+                                        onChange={(e) => setEditForm({ ...editForm, performanceMetrics: e.target.value })}
+                                        className="w-full h-32 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono"
+                                        placeholder='{"totalReturn": "+124.5%", "sharpeRatio": "1.84", "monthlyReturns": [...]}'
                                     />
                                 </div>
                                 <div className="flex gap-2 pt-4">

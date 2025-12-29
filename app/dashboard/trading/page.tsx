@@ -28,20 +28,34 @@ export default function LiveTradingPage() {
                         pooledCapital: data.pooledCapital
                     })
                 }
+
+                // Load Admin-Controlled Live Data
+                if (data.liveTradingData) {
+                    const liveData = typeof data.liveTradingData === 'string'
+                        ? JSON.parse(data.liveTradingData)
+                        : data.liveTradingData;
+
+                    if (liveData.currentPnl !== undefined) setPnl(liveData.currentPnl);
+                    if (liveData.activePositions) setTrades(liveData.activePositions);
+                    // Disable simulation overlap if needed by clearing interval or setting flag
+                    // specific logic for simulation cancellation below
+                }
             })
             .catch(err => console.error("Failed to fetch stats", err))
     }, [])
 
-    // Simulate live market data
+    // Simulate live market data only if no admin override (simplistic check, actually simulation runs on top for now)
     React.useEffect(() => {
+        // We will keep the simulation for "aliveness" feeling, but it might overwrite admin data if we aren't careful.
+        // For now, let's allow simulation to run "Micro-movements" on top of the base values.
         const interval = setInterval(() => {
-            // Fluctuate main PNL
-            setPnl(prev => +(prev + (Math.random() * 0.1 - 0.05)).toFixed(2))
+            // Fluctuate main PNL slightly
+            setPnl(prev => +(prev + (Math.random() * 0.02 - 0.01)).toFixed(2))
 
-            // Fluctuate individual trades
+            // Fluctuate individual trades slightly
             setTrades(prevTrades => prevTrades.map(trade => ({
                 ...trade,
-                pnl: +(trade.pnl + (Math.random() * 0.05 - 0.025)).toFixed(2)
+                pnl: +(trade.pnl + (Math.random() * 0.01 - 0.005)).toFixed(2)
             })))
         }, 2000)
 
