@@ -16,7 +16,9 @@ export default function DashboardPage() {
         activeTrading: 0,
         profit: 0,
         mainBalance: 0,
-        recentActivity: [] as any[]
+        recentActivity: [] as any[],
+        chartData: [] as any[],
+        sentimentData: null as any
     })
     const [isLoading, setIsLoading] = useState(true)
 
@@ -60,6 +62,29 @@ export default function DashboardPage() {
         setIsRefreshing(true)
         fetchData()
         toast.success("Dashboard data updated")
+    }
+
+    // Default sentiment if none provided
+    const defaultSentiment = [
+        { symbol: "XAUUSD (Gold)", sentiment: 65, type: "Bullish" },
+        { symbol: "EURUSD", sentiment: 58, type: "Bearish" }
+    ];
+
+    let displaySentiment = defaultSentiment;
+
+    if (dashboardData.sentimentData) {
+        if (Array.isArray(dashboardData.sentimentData)) {
+            displaySentiment = dashboardData.sentimentData;
+        } else if (typeof dashboardData.sentimentData === 'string') {
+            try {
+                const parsed = JSON.parse(dashboardData.sentimentData);
+                if (Array.isArray(parsed)) {
+                    displaySentiment = parsed;
+                }
+            } catch (e) {
+                console.error("Failed to parse sentiment data:", e);
+            }
+        }
     }
 
     return (
@@ -214,24 +239,17 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4 mt-2">
-                            <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                    <span className="font-medium">XAUUSD (Gold)</span>
-                                    <span className="text-emerald-500">65% Bullish</span>
+                            {displaySentiment.map((item: any, i: number) => (
+                                <div key={i} className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="font-medium">{item.symbol}</span>
+                                        <span className={item.type === 'Bullish' ? "text-emerald-500" : "text-red-500"}>{item.sentiment}% {item.type}</span>
+                                    </div>
+                                    <div className="h-2 bg-secondary/50 rounded-full overflow-hidden">
+                                        <div className={`h-full ${item.type === 'Bullish' ? "bg-emerald-500" : "bg-red-500"} rounded-full`} style={{ width: `${item.sentiment}%` }} />
+                                    </div>
                                 </div>
-                                <div className="h-2 bg-secondary/50 rounded-full overflow-hidden">
-                                    <div className="h-full bg-emerald-500 w-[65%] rounded-full" />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                    <span className="font-medium">EURUSD</span>
-                                    <span className="text-red-500">58% Bearish</span>
-                                </div>
-                                <div className="h-2 bg-secondary/50 rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-500 w-[58%] rounded-full" />
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </CardContent>
                 </Card>
@@ -246,7 +264,7 @@ export default function DashboardPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
-                        <OverviewChart />
+                        <OverviewChart data={dashboardData.chartData} />
                     </CardContent>
                 </Card>
 

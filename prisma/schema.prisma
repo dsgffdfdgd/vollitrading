@@ -32,6 +32,7 @@ model Wallet {
   mainBalance  Float         @default(0.0)
   tradingBalance Float       @default(0.0)
   profitBalance Float        @default(0.0)
+  chartData     Json?
   transactions Transaction[]
 }
 
@@ -75,5 +76,6 @@ model PlatformStat {
   activeTraders Int      @default(0)
   pooledCapital Float    @default(0.0)
   activeTradingDisplay Float @default(0.0)
+  sentimentData Json?
   updatedAt     DateTime @updatedAt
 }

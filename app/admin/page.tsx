@@ -11,7 +11,7 @@ import { useState, useEffect } from "react"
 
 export default function AdminPage() {
     // Profit Management State
-    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0 })
+    const [stats, setStats] = useState({ activeTraders: 1240, pooledCapital: 2400000, activeTradingDisplay: 0, sentimentData: "" })
     const [profitInput, setProfitInput] = useState("")
 
     // Transaction & User Management State
@@ -21,7 +21,7 @@ export default function AdminPage() {
 
     // Edit User Wallet State
     const [editingUser, setEditingUser] = useState<any>(null)
-    const [editForm, setEditForm] = useState({ mainBalance: 0, tradingBalance: 0, profitBalance: 0 })
+    const [editForm, setEditForm] = useState({ mainBalance: 0, tradingBalance: 0, profitBalance: 0, chartData: "" })
     const [isEditOpen, setIsEditOpen] = useState(false)
 
     useEffect(() => {
@@ -51,7 +51,8 @@ export default function AdminPage() {
                 setStats({
                     activeTraders: data.activeTraders || 1240,
                     pooledCapital: data.pooledCapital || 2400000,
-                    activeTradingDisplay: data.activeTradingDisplay || 0
+                    activeTradingDisplay: data.activeTradingDisplay || 0,
+                    sentimentData: data.sentimentData ? JSON.stringify(data.sentimentData, null, 2) : ""
                 })
             }
         } catch (error) {
@@ -61,10 +62,23 @@ export default function AdminPage() {
 
     const handleUpdateStats = async () => {
         try {
+            let parsedSentiment = null;
+            if (stats.sentimentData) {
+                try {
+                    parsedSentiment = JSON.parse(stats.sentimentData);
+                } catch (e) {
+                    toast.error("Invalid JSON format for Sentiment Data");
+                    return;
+                }
+            }
+
             const res = await fetch('/api/admin/stats', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(stats)
+                body: JSON.stringify({
+                    ...stats,
+                    sentimentData: parsedSentiment
+                })
             })
 
             const data = await res.json()
@@ -130,13 +144,24 @@ export default function AdminPage() {
         setEditForm({
             mainBalance: user.wallet.mainBalance,
             tradingBalance: user.wallet.tradingBalance,
-            profitBalance: user.wallet.profitBalance
+            profitBalance: user.wallet.profitBalance,
+            chartData: user.wallet.chartData ? JSON.stringify(user.wallet.chartData, null, 2) : ""
         })
         setIsEditOpen(true)
     }
 
     const handleUpdateWallet = async () => {
         if (!editingUser) return
+
+        let parsedChartData = null;
+        if (editForm.chartData) {
+            try {
+                parsedChartData = JSON.parse(editForm.chartData);
+            } catch (e) {
+                toast.error("Invalid JSON format for Chart Data");
+                return;
+            }
+        }
 
         const loadingToast = toast.loading("Updating wallet...")
         try {
@@ -145,7 +170,8 @@ export default function AdminPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId: editingUser.id,
-                    ...editForm
+                    ...editForm,
+                    chartData: parsedChartData
                 })
             })
 
@@ -249,8 +275,8 @@ export default function AdminPage() {
                     {/* Platform Stats Management */}
                     <Card className="bg-gray-900 border-gray-800">
                         <CardHeader>
-                            <CardTitle>Platform Stats</CardTitle>
-                            <CardDescription>Update global counters shown on landing page.</CardDescription>
+                            <CardTitle>Platform Stats & Live Data</CardTitle>
+                            <CardDescription>Update global counters and market sentiment.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
@@ -281,10 +307,23 @@ export default function AdminPage() {
                                         className="bg-black border-emerald-500/50"
                                         placeholder="Amount to show on every user's 'Active Trading' card"
                                     />
-                                    <p className="text-[10px] text-gray-500">This value will appear on EVERY user's dashboard as their 'Active Trading' amount.</p>
                                 </div>
                             </div>
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleUpdateStats}>
+
+                            <div className="space-y-2 mt-4">
+                                <label className="text-xs text-emerald-400 font-bold">Market Sentiment Data (JSON)</label>
+                                <textarea
+                                    value={stats.sentimentData}
+                                    onChange={(e) => setStats({ ...stats, sentimentData: e.target.value })}
+                                    className="w-full h-24 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono text-white"
+                                    placeholder='[{"symbol":"XAUUSD", "sentiment":65, "type":"Bullish"}, ...]'
+                                />
+                                <p className="text-[10px] text-gray-500">
+                                    Format: Array of objects with symbol, sentiment (0-100), and type ("Bullish"/"Bearish").
+                                </p>
+                            </div>
+
+                            <Button className="w-full bg-blue-600 hover:bg-blue-700 mt-4" onClick={handleUpdateStats}>
                                 Update Stats
                             </Button>
                         </CardContent>
@@ -452,7 +491,7 @@ export default function AdminPage() {
             {
                 isEditOpen && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                        <Card className="w-full max-w-md bg-gray-900 border-gray-800 shadow-2xl">
+                        <Card className="w-full max-w-md bg-gray-900 border-gray-800 shadow-2xl h-auto max-h-[90vh] overflow-y-auto">
                             <CardHeader>
                                 <CardTitle>Edit User Wallet</CardTitle>
                                 <CardDescription>Manually adjust balances for {editingUser?.name}</CardDescription>
@@ -483,6 +522,15 @@ export default function AdminPage() {
                                         value={editForm.profitBalance}
                                         onChange={(e) => setEditForm({ ...editForm, profitBalance: parseFloat(e.target.value) })}
                                         className="bg-black border-gray-700"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs text-gray-400">Performance Chart Data (JSON)</label>
+                                    <textarea
+                                        value={editForm.chartData}
+                                        onChange={(e) => setEditForm({ ...editForm, chartData: e.target.value })}
+                                        className="w-full h-32 bg-black border border-gray-700 rounded-md p-2 text-xs font-mono"
+                                        placeholder='[{"date":"Mon","value":100},{"date":"Tue","value":150}]'
                                     />
                                 </div>
                                 <div className="flex gap-2 pt-4">

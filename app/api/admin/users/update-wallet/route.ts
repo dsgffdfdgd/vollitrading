@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { userId, mainBalance, tradingBalance, profitBalance } = await req.json();
+        const { userId, mainBalance, tradingBalance, profitBalance, chartData } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ error: "User ID required" }, { status: 400 });
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         const deltaTrading = newTrading - currentWallet.tradingBalance;
         const deltaProfit = newProfit - currentWallet.profitBalance;
 
-        const transactions = [];
+        const transactions: any[] = [];
 
         // Helper to add transaction
         const addTx = (amount: number, type: string, ref: string) => {
@@ -63,7 +63,6 @@ export async function POST(req: Request) {
             );
         };
 
-        // 2. Determine types and create records
         // 2. Determine types and create records
         if (deltaMain !== 0) {
             const type = deltaMain > 0 ? "DEPOSIT" : "WITHDRAWAL";
@@ -91,6 +90,19 @@ export async function POST(req: Request) {
             }),
             ...transactions
         ]);
+
+        // 4. Update Chart Data if provided (using raw query)
+        if (chartData && Array.isArray(chartData)) {
+            try {
+                await prisma.$executeRaw`
+                    UPDATE "Wallet" 
+                    SET "chartData" = ${JSON.stringify(chartData)}::jsonb 
+                    WHERE "userId" = ${userId}
+                `;
+            } catch (e) {
+                console.error("Chart Update Failed:", e);
+            }
+        }
 
         return NextResponse.json({ success: true, message: "Wallet updated and transactions recorded" });
     } catch (error) {

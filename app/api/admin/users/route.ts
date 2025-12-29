@@ -25,26 +25,25 @@ export async function GET() {
     }
 
     try {
-        const users = await prisma.user.findMany({
-            include: {
-                wallet: true
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
+        // Use raw query to ensure we get chartData
+        const usersRaw: any[] = await prisma.$queryRaw`
+            SELECT u.id, u.name, u.email, u."createdAt", 
+                   w."mainBalance", w."tradingBalance", w."profitBalance", w."chartData"
+            FROM "User" u
+            LEFT JOIN "Wallet" w ON u.id = w."userId"
+            ORDER BY u."createdAt" DESC
+        `;
 
-        // Safe map to avoid sending password hashes if they exist (though prisma default might not select them depending on logic)
-        // Adjust returned fields as needed
-        const safeUsers = users.map(user => ({
+        const safeUsers = usersRaw.map(user => ({
             id: user.id,
             name: user.name,
             email: user.email,
             createdAt: user.createdAt,
             wallet: {
-                mainBalance: user.wallet?.mainBalance || 0,
-                tradingBalance: user.wallet?.tradingBalance || 0,
-                profitBalance: user.wallet?.profitBalance || 0
+                mainBalance: user.mainBalance || 0,
+                tradingBalance: user.tradingBalance || 0,
+                profitBalance: user.profitBalance || 0,
+                chartData: user.chartData || null
             }
         }));
 
