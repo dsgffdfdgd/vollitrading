@@ -7,7 +7,7 @@ export function Regulations() {
             name: "CySEC",
             fullName: "Cyprus Securities and Exchange Commission",
             icon: <Globe className="h-10 w-10 text-blue-500" />,
-            description: "Regulated by the Cyprus Securities and Exchange Commission under license number 123/45. Ensuring adherence to European financial standards.",
+            description: "Regulated by the Cyprus Securities and Exchange Commission. Ensuring adherence to European financial standards.",
             color: "bg-blue-500/10 border-blue-500/20"
         },
         {
