@@ -170,9 +170,9 @@ function WalletContent() {
             });
 
             if (res.ok) {
-                toast.success(`Successfully transferred $${mainBalance.toFixed(2)} to Trading Pool`);
+                toast.success(`Successfully transferred $${mainBalance.toFixed(2)} to Profit Wallet`);
                 // Optimistic Update
-                setTradingBalance(prev => prev + mainBalance);
+                setProfitBalance(prev => prev + mainBalance);
                 setMainBalance(0);
             } else {
                 const data = await res.json();
@@ -227,7 +227,7 @@ function WalletContent() {
 
     const handleCompound = async () => {
         if (profitBalance <= 0) {
-            toast.error("No profits to compound")
+            toast.error("No profits to transfer")
             return;
         }
 
@@ -239,12 +239,12 @@ function WalletContent() {
             });
 
             if (res.ok) {
-                toast.success(`Compounded $${profitBalance.toFixed(2)} into Trading Pool`)
-                setTradingBalance(prev => prev + profitBalance);
+                toast.success(`Transferred $${profitBalance.toFixed(2)} to Main Wallet`)
+                setMainBalance(prev => prev + profitBalance);
                 setProfitBalance(0);
             } else {
                 const data = await res.json();
-                toast.error(data.error || "Compound failed");
+                toast.error(data.error || "Transfer failed");
             }
         } catch (e) {
             toast.error("Network error");
@@ -279,8 +279,8 @@ function WalletContent() {
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Transfer to Trading Pool</DialogTitle>
-                                        <DialogDescription>Move funds from your Main Wallet to the live Trading Pool.</DialogDescription>
+                                        <DialogTitle>Transfer to Profit Wallet</DialogTitle>
+                                        <DialogDescription>Move funds from your Main Wallet to your Profit Wallet.</DialogDescription>
                                     </DialogHeader>
                                     <div className="py-4">
                                         <div className="text-sm text-gray-400 mb-2">Available to Transfer</div>
@@ -376,17 +376,17 @@ function WalletContent() {
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Reinvest Profits</DialogTitle>
-                                        <DialogDescription>Compound your profits back into the Trading Pool for higher potential returns.</DialogDescription>
+                                        <DialogTitle>Transfer Profits to Main</DialogTitle>
+                                        <DialogDescription>Move your profits to your Main Wallet.</DialogDescription>
                                     </DialogHeader>
                                     <div className="py-4">
                                         <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-300">
                                             <Activity className="h-4 w-4" />
-                                            <span className="text-sm">Compounding increases your capital base instantly.</span>
+                                            <span className="text-sm">Secure your profits by moving them to your Main Wallet.</span>
                                         </div>
                                     </div>
                                     <DialogFooter>
-                                        <Button onClick={handleCompound} className="w-full bg-emerald-600 hover:bg-emerald-700">Confirm Reinvestment</Button>
+                                        <Button onClick={handleCompound} className="w-full bg-emerald-600 hover:bg-emerald-700">Confirm Transfer</Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
