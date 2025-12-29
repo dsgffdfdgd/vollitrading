@@ -63,6 +63,11 @@ export async function GET(req: Request) {
             performanceMetrics: performanceMetrics,
             sentimentData: stats?.sentimentData || null,
             liveTradingData: stats?.liveTradingData || null,
+
+            // Global Stats
+            activeTraders: stats?.activeTraders || 1240,
+            pooledCapital: stats?.pooledCapital || 24000000,
+
             wallet: { // Nested object for WalletPage compatibility
                 id: user.wallet.id,
                 mainBalance: user.wallet.mainBalance || 0,

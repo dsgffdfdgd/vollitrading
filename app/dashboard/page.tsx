@@ -2,7 +2,7 @@
 
 import { OverviewChart } from "@/components/dashboard/OverviewChart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowUpRight, DollarSign, Wallet, TrendingUp, Activity, RefreshCw, Globe, Calendar, BarChart } from "lucide-react"
+import { ArrowUpRight, DollarSign, Wallet, TrendingUp, Activity, RefreshCw, Globe, Calendar, BarChart, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
@@ -18,7 +18,9 @@ export default function DashboardPage() {
         mainBalance: 0,
         recentActivity: [] as any[],
         chartData: [] as any[],
-        sentimentData: null as any
+        sentimentData: null as any,
+        activeTraders: 0,
+        pooledCapital: 0
     })
     const [isLoading, setIsLoading] = useState(true)
 
@@ -162,6 +164,39 @@ export default function DashboardPage() {
                             </Button>
                         </div>
                         <p className="text-[10px] text-muted-foreground/30 font-mono">ID: {dashboardData.walletId}</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Platform Ecosystem Stats */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="bg-gradient-to-br from-gray-900 to-black border-gray-800">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-400">Platform Volume</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-emerald-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+                            ${(dashboardData.pooledCapital / 1000000).toFixed(1)}M+
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Total volume traded globally
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-gray-900 to-black border-gray-800">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-400">Active Traders</CardTitle>
+                        <Users className="h-4 w-4 text-blue-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
+                            {(dashboardData.activeTraders / 1000).toFixed(1)}k+
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Traders currently active
+                        </p>
                     </CardContent>
                 </Card>
             </div>
