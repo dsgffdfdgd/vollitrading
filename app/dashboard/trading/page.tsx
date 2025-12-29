@@ -16,18 +16,26 @@ export default function LiveTradingPage() {
         { pair: "GBP/JPY", type: "Short", entry: "182.30", pnl: 1.20, current: 180.12 },
         { pair: "XAU/USD", type: "Long", entry: "2045.50", pnl: -0.15, current: 2042.10 },
     ])
+    const [allocatedCapital, setAllocatedCapital] = useState(0)
+    const [exposure, setExposure] = useState("15%")
+    const [nextSettlement, setNextSettlement] = useState("4h 32m")
+    const [chartData, setChartData] = useState<any[] | undefined>(undefined)
 
     useEffect(() => {
-        // Fetch global stats
-        fetch('/api/admin/stats')
+        // Fetch user dashboard data (includes global stats)
+        fetch('/api/user/dashboard')
             .then(res => res.json())
             .then(data => {
-                if (data.activeTraders) {
-                    setStats({
-                        activeTraders: data.activeTraders,
-                        pooledCapital: data.pooledCapital
-                    })
+                // Set User-Specific Data
+                if (data.activeTrading !== undefined) {
+                    setAllocatedCapital(data.activeTrading)
                 }
+
+                // Global Stats (fallback defaults if missing in response, but usually present)
+                // Note: user/dashboard might not return activeTraders/pooledCapital directly in root, 
+                // but we can rely on defaults or update API. 
+                // Actually, let's keep the /api/admin/stats fetch for global counters if needed, 
+                // OR just accept that /api/user/dashboard returns liveTradingData.
 
                 // Load Admin-Controlled Live Data
                 if (data.liveTradingData) {
@@ -37,11 +45,26 @@ export default function LiveTradingPage() {
 
                     if (liveData.currentPnl !== undefined) setPnl(liveData.currentPnl);
                     if (liveData.activePositions) setTrades(liveData.activePositions);
-                    // Disable simulation overlap if needed by clearing interval or setting flag
-                    // specific logic for simulation cancellation below
+                    if (liveData.masterPoolChart) setChartData(liveData.masterPoolChart);
+
+                    if (liveData.exposure) setExposure(liveData.exposure);
+                    if (liveData.nextSettlement) setNextSettlement(liveData.nextSettlement);
                 }
             })
-            .catch(err => console.error("Failed to fetch stats", err))
+            .catch(err => console.error("Failed to fetch dashboard data", err))
+
+        // Separate fetch for global counters (activeTraders, pooledCapital) if they are not in user dashboard
+        fetch('/api/admin/stats')
+            .then(res => res.json())
+            .then(data => {
+                if (data.activeTraders) {
+                    setStats({
+                        activeTraders: data.activeTraders,
+                        pooledCapital: data.pooledCapital
+                    })
+                }
+            })
+            .catch(e => null)
     }, [])
 
     // Simulate live market data only if no admin override (simplistic check, actually simulation runs on top for now)
@@ -97,7 +120,7 @@ export default function LiveTradingPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="h-[400px]">
-                            <OverviewChart />
+                            <OverviewChart data={chartData} />
                         </div>
                     </CardContent>
                 </Card>
@@ -147,17 +170,17 @@ export default function LiveTradingPage() {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">Your Allocated Capital</div>
-                            <div className="text-2xl font-bold text-white">$10,000.00</div>
+                            <div className="text-2xl font-bold text-white">${allocatedCapital.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
                         </div>
                         <div className="h-12 w-px bg-white/10 hidden md:block" />
                         <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">Current Exposure</div>
-                            <div className="text-2xl font-bold text-blue-400">15%</div>
+                            <div className="text-2xl font-bold text-blue-400">{exposure}</div>
                         </div>
                         <div className="h-12 w-px bg-white/10 hidden md:block" />
                         <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">Next Settlement</div>
-                            <div className="text-2xl font-bold text-orange-400">4h 32m</div>
+                            <div className="text-2xl font-bold text-orange-400">{nextSettlement}</div>
                         </div>
                     </div>
                 </CardContent>
