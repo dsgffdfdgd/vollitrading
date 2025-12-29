@@ -305,7 +305,7 @@ export default function AdminPage() {
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs text-gray-400">Active Traders (Global)</label>
+                                    <label className="text-xs text-emerald-400 font-medium">Active Traders (Global & Landing Page)</label>
                                     <Input
                                         type="number"
                                         value={stats.activeTraders}
@@ -314,13 +314,16 @@ export default function AdminPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-xs text-gray-400">Pooled Capital (Global)</label>
+                                    <label className="text-xs text-blue-400 font-medium">Volume Traded / Pooled Capital</label>
                                     <Input
                                         type="number"
                                         value={stats.pooledCapital}
                                         onChange={(e) => setStats({ ...stats, pooledCapital: Number(e.target.value) })}
                                         className="bg-black border-gray-700"
                                     />
+                                    <p className="text-[10px] text-gray-500">
+                                        Shown as "Volume Traded" on landing page ($XX.XM+).
+                                    </p>
                                 </div>
                                 <div className="space-y-2 col-span-2">
                                     <label className="text-xs text-emerald-400 font-bold">Allocated to Pool A (User Dashboard Display)</label>
