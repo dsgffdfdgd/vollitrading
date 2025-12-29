@@ -296,37 +296,54 @@ export default function AdminPage() {
 
             <div className="flex-1 p-8 overflow-y-auto">
                 <div className="grid gap-6 md:grid-cols-2">
+                    {/* Global Counters Management */}
+                    <Card className="bg-gray-900 border-gray-800 border-l-4 border-l-blue-500">
+                        <CardHeader>
+                            <CardTitle>Global Ecosystem Stats</CardTitle>
+                            <CardDescription>Control the "Platform Volume" and "Active Traders" figures visible on the Landing Page and User Dashboard.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs text-blue-400 font-bold">Total Platform Volume ($)</label>
+                                    <Input
+                                        type="number"
+                                        value={stats.pooledCapital}
+                                        onChange={(e) => setStats({ ...stats, pooledCapital: Number(e.target.value) })}
+                                        className="bg-black border-gray-700 text-lg font-mono text-emerald-500"
+                                        placeholder="e.g. 24000000"
+                                    />
+                                    <p className="text-[10px] text-gray-400">
+                                        Displays as "${(stats.pooledCapital / 1000000).toFixed(1)}M+"
+                                    </p>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs text-blue-400 font-bold">Active Traders Count</label>
+                                    <Input
+                                        type="number"
+                                        value={stats.activeTraders}
+                                        onChange={(e) => setStats({ ...stats, activeTraders: Number(e.target.value) })}
+                                        className="bg-black border-gray-700 text-lg font-mono text-blue-500"
+                                        placeholder="e.g. 1240"
+                                    />
+                                    <p className="text-[10px] text-gray-400">
+                                        Displays as "{(stats.activeTraders / 1000).toFixed(1)}k+"
+                                    </p>
+                                </div>
+                            </div>
+                            <Button className="w-full bg-blue-600 hover:bg-blue-700 mt-2" onClick={handleUpdateStats}>
+                                Update Global Stats
+                            </Button>
+                        </CardContent>
+                    </Card>
+
                     {/* Platform Stats Management */}
                     <Card className="bg-gray-900 border-gray-800">
                         <CardHeader>
                             <CardTitle>Platform Stats & Live Data</CardTitle>
                             <CardDescription>Update global counters and market sentiment.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs text-emerald-400 font-medium">Active Traders (Global & Landing Page)</label>
-                                    <Input
-                                        type="number"
-                                        value={stats.activeTraders}
-                                        onChange={(e) => setStats({ ...stats, activeTraders: Number(e.target.value) })}
-                                        className="bg-black border-gray-700"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs text-blue-400 font-medium">Volume Traded / Pooled Capital</label>
-                                    <Input
-                                        type="number"
-                                        value={stats.pooledCapital}
-                                        onChange={(e) => setStats({ ...stats, pooledCapital: Number(e.target.value) })}
-                                        className="bg-black border-gray-700"
-                                    />
-                                    <p className="text-[10px] text-gray-500">
-                                        Shown as "Volume Traded" on landing page ($XX.XM+).
-                                    </p>
-                                </div>
-                                {/* Removed global activeTradingDisplay as it is now per-user */}
-                            </div>
+                        <div className="space-y-4">
 
                             <div className="space-y-4 mt-4">
                                 <div className="space-y-2">
