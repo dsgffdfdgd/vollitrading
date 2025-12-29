@@ -343,7 +343,7 @@ export default function AdminPage() {
                             <CardTitle>Platform Stats & Live Data</CardTitle>
                             <CardDescription>Update global counters and market sentiment.</CardDescription>
                         </CardHeader>
-                        <div className="space-y-4">
+                        <CardContent className="space-y-4">
 
                             <div className="space-y-4 mt-4">
                                 <div className="space-y-2">
