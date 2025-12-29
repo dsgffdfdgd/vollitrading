@@ -64,18 +64,19 @@ export async function POST(req: Request) {
         };
 
         // 2. Determine types and create records
+        // 2. Determine types and create records
         if (deltaMain !== 0) {
             const type = deltaMain > 0 ? "DEPOSIT" : "WITHDRAWAL";
-            addTx(deltaMain, type, `Admin Edit (Main): ${deltaMain > 0 ? '+' : ''}${deltaMain.toFixed(2)}`);
+            addTx(deltaMain, type, `Balance Adjustment`);
         }
         if (deltaTrading !== 0) {
             // Trading changes treated as Deposit/Withdrawal to/from pool
             const type = deltaTrading > 0 ? "DEPOSIT" : "WITHDRAWAL";
-            addTx(deltaTrading, type, `Admin Edit (Trading): ${deltaTrading > 0 ? '+' : ''}${deltaTrading.toFixed(2)}`);
+            addTx(deltaTrading, type, `Pool Allocation`);
         }
         if (deltaProfit !== 0) {
             const type = deltaProfit > 0 ? "PROFIT" : "LOSS";
-            addTx(deltaProfit, type, `Admin Edit (Profit): ${deltaProfit > 0 ? '+' : ''}${deltaProfit.toFixed(2)}`);
+            addTx(deltaProfit, type, `P&L Adjustment`);
         }
 
         // 3. Execute Transaction
