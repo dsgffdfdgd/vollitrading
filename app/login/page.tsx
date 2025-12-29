@@ -140,19 +140,6 @@ export default function LoginPage() {
                         </form>
                     </CardContent>
                     <CardFooter className="flex flex-col px-0 gap-4">
-                        <div className="relative w-full">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-background px-2 text-muted-foreground">
-                                    Or continue with
-                                </span>
-                            </div>
-                        </div>
-                        <Button variant="outline" className="w-full" type="button" onClick={() => toast.info("Google Login is coming soon")}>
-                            Google
-                        </Button>
                         <p className="text-center text-sm text-muted-foreground mt-2">
                             Don't have an account?{" "}
                             <Link href="/register" className="text-primary hover:underline font-medium">
