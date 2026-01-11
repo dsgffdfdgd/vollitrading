@@ -89,9 +89,7 @@ function WalletContent() {
             return
         }
 
-        if (selectedPaymentMethod === 'card') {
-            toast.error("Card deposits are currently unavailable. Please use Crypto.")
-            return
+
 
             if (!userDetails.firstName || !userDetails.lastName || !userDetails.phone || !userDetails.telegram) {
                 toast.error("Please fill in all personal details for identification")

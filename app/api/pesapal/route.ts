@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
-const PESAPAL_CONSUMER_KEY = "vLWPDMX8o/0BtGsGdDrKuaC8RbmKIBUl";
-const PESAPAL_CONSUMER_SECRET = "sIuyZY/sSQ0p13FpP92Fj3NmepM=";
+const PESAPAL_CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY || "";
+const PESAPAL_CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET || "";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key-change-this";
 
 export const dynamic = 'force-dynamic';
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
                     "Authorization": `Bearer ${tokenAuth}`
                 },
                 body: JSON.stringify({
-                    url: "https://vollitrading.com/api/ipn",
+                    url: `${process.env.NEXT_PUBLIC_APP_URL}/api/ipn`,
                     ipn_notification_type: "GET"
                 })
             });
@@ -125,7 +125,7 @@ export async function POST(req: Request) {
             currency: currency || "USD",
             amount: parseFloat(amount),
             description: "Wallet Deposit",
-            callback_url: "https://vollitrading.com/dashboard/wallet",
+            callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/wallet`,
             notification_id: notification_id,
             billing_address: {
                 email_address: email || "user@example.com",
