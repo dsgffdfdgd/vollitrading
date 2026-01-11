@@ -89,8 +89,7 @@ function WalletContent() {
             return
         }
 
-
-
+        if (selectedPaymentMethod === 'card') {
             if (!userDetails.firstName || !userDetails.lastName || !userDetails.phone || !userDetails.telegram) {
                 toast.error("Please fill in all personal details for identification")
                 return
